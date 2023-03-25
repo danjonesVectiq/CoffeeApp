@@ -48,16 +48,16 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            coffee.Id = Guid.NewGuid();
+            coffee.id = Guid.NewGuid();
             var coffeesContainer = await _cosmosDbService.GetOrCreateContainerAsync("Coffees", "/id");
             await _cosmosDbService.AddItemAsync(coffeesContainer, coffee);
-            return CreatedAtAction(nameof(GetCoffee), new { id = coffee.Id }, coffee);
+            return CreatedAtAction(nameof(GetCoffee), new { id = coffee.id }, coffee);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateCoffee(Guid id, [FromBody] Coffee coffee)
         {
-            if (!ModelState.IsValid || id != coffee.Id)
+            if (!ModelState.IsValid || id != coffee.id)
             {
                 return BadRequest(ModelState);
             }

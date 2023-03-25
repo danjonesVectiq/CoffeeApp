@@ -23,7 +23,7 @@ namespace CoffeeAppAPI.Models
 
     public class Coffee
     {
-        public Guid Id { get; set; }
+        public Guid id { get; set; }
         public string CoffeeName { get; set; }
         public string CoffeeType { get; set; }
         public string Origin { get; set; }
@@ -36,7 +36,7 @@ namespace CoffeeAppAPI.Models
 
     public class CoffeeShop
     {
-        public Guid Id { get; set; }
+        public Guid id { get; set; }
         public string CoffeeShopName { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
@@ -52,7 +52,7 @@ namespace CoffeeAppAPI.Models
 
     public class CheckIn
     {
-        public Guid Id { get; set; }
+        public Guid id { get; set; }
         public Guid UserId { get; set; }
         public Guid CoffeeId { get; set; }
         public Guid CoffeeShopId { get; set; }

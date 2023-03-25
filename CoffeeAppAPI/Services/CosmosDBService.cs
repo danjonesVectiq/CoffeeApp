@@ -16,9 +16,10 @@ namespace CoffeeAppAPI.Services
         Task AddItemAsync<T>(Container container, T item);
         Task UpdateItemAsync<T>(Container container, string id, T item);
         Task DeleteItemAsync<T>(Container container, string id);
+        Task DeleteAllItemsAsync<T>(Container container) where T : class;
     }
 
-    public class CosmosDbService: ICosmosDbService
+    public class CosmosDbService : ICosmosDbService
     {
         private readonly CosmosClient _cosmosClient;
 
@@ -79,6 +80,24 @@ namespace CoffeeAppAPI.Services
         {
             await container.DeleteItemAsync<T>(id, new PartitionKey(id));
         }
+
+        public async Task DeleteAllItemsAsync<T>(Container container) where T : class
+        {
+            var query = container.GetItemQueryIterator<T>(new QueryDefinition("SELECT * FROM c"));
+            var itemsToDelete = new List<T>();
+
+            while (query.HasMoreResults)
+            {
+                var response = await query.ReadNextAsync();
+                itemsToDelete.AddRange(response);
+            }
+
+            foreach (var item in itemsToDelete)
+            {
+                await container.DeleteItemAsync<T>(item.GetType().GetProperty("id").GetValue(item).ToString(), new PartitionKey(item.GetType().GetProperty("id").GetValue(item).ToString()));
+            }
+        }
+
 
     }
 }
