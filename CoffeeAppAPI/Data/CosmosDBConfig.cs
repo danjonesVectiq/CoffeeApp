@@ -1,4 +1,4 @@
-namespace CoffeeApp.Configuration
+namespace CoffeeAppAPI.Configuration
 {
     public class CosmosDbConfig
     {

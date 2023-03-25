@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using CoffeeApp.Models;
-using CoffeeApp.Services;
+using CoffeeAppAPI.Models;
+using CoffeeAppAPI.Services;
 
-namespace CoffeeApp.Controllers
+namespace CoffeeAppAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class UserBadgesController : ControllerBase
     {
-        private readonly CosmosDbService _cosmosDbService;
+        private readonly ICosmosDbService _cosmosDbService;
 
-        public UserBadgesController(CosmosDbService cosmosDbService)
+        public UserBadgesController(ICosmosDbService cosmosDbService)
         {
             _cosmosDbService = cosmosDbService;
         }

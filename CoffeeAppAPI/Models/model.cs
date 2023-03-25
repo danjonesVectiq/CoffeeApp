@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace CoffeeApp.Models
+namespace CoffeeAppAPI.Models
 {
     public class User
     {

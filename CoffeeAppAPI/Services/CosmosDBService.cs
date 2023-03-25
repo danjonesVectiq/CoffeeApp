@@ -5,9 +5,20 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 
-namespace CoffeeApp.Services
+namespace CoffeeAppAPI.Services
 {
-    public class CosmosDbService
+
+    public interface ICosmosDbService
+    {
+        Task<Container> GetOrCreateContainerAsync(string containerId, string partitionKeyPath);
+        Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container);
+        Task<T> GetItemAsync<T>(Container container, string id);
+        Task AddItemAsync<T>(Container container, T item);
+        Task UpdateItemAsync<T>(Container container, string id, T item);
+        Task DeleteItemAsync<T>(Container container, string id);
+    }
+
+    public class CosmosDbService: ICosmosDbService
     {
         private readonly CosmosClient _cosmosClient;
 

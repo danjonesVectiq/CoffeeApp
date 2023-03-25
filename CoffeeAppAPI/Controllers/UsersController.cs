@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using CoffeeApp.Models;
-using CoffeeApp.Services;
+using CoffeeAppAPI.Models;
+using CoffeeAppAPI.Services;
 
-namespace CoffeeApp.Controllers
+namespace CoffeeAppAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly CosmosDbService _cosmosDbService;
+        private readonly ICosmosDbService _cosmosDbService;
 
-        public UsersController(CosmosDbService cosmosDbService)
+        public UsersController(ICosmosDbService cosmosDbService)
         {
             _cosmosDbService = cosmosDbService;
         }
@@ -27,7 +27,7 @@ namespace CoffeeApp.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(Guid id)
+        public async Task<ActionResult<User>> GetUser(string id)
         {
             var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
             var user = await _cosmosDbService.GetItemAsync<User>(usersContainer, id.ToString());
@@ -62,7 +62,7 @@ namespace CoffeeApp.Controllers
                 return BadRequest(ModelState);
             }
 
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/d");
+            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
             var existingUser = await _cosmosDbService.GetItemAsync<User>(usersContainer, id.ToString());
 
             if (existingUser == null)
