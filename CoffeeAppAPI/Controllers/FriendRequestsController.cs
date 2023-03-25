@@ -21,7 +21,7 @@ namespace CoffeeApp.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FriendRequest>>> GetAllFriendRequests()
         {
-            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/friendRequestId");
+            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/id");
             var friendRequests = await _cosmosDbService.GetAllItemsAsync<FriendRequest>(friendRequestsContainer);
             return Ok(friendRequests);
         }
@@ -29,7 +29,7 @@ namespace CoffeeApp.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<FriendRequest>> GetFriendRequest(Guid id)
         {
-            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/friendRequestId");
+            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/id");
             var friendRequest = await _cosmosDbService.GetItemAsync<FriendRequest>(friendRequestsContainer, id.ToString());
 
             if (friendRequest == null)
@@ -48,21 +48,21 @@ namespace CoffeeApp.Controllers
                 return BadRequest(ModelState);
             }
 
-            friendRequest.FriendRequestId = Guid.NewGuid();
-            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/friendRequestId");
+            friendRequest.Id = Guid.NewGuid();
+            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/id");
             await _cosmosDbService.AddItemAsync(friendRequestsContainer, friendRequest);
-            return CreatedAtAction(nameof(GetFriendRequest), new { id = friendRequest.FriendRequestId }, friendRequest);
+            return CreatedAtAction(nameof(GetFriendRequest), new { id = friendRequest.Id }, friendRequest);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateFriendRequest(Guid id, [FromBody] FriendRequest friendRequest)
         {
-            if (!ModelState.IsValid || id != friendRequest.FriendRequestId)
+            if (!ModelState.IsValid || id != friendRequest.Id)
             {
                 return BadRequest(ModelState);
             }
 
-            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/friendRequestId");
+            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/id");
             var existingFriendRequest = await _cosmosDbService.GetItemAsync<FriendRequest>(friendRequestsContainer, id.ToString());
 
             if (existingFriendRequest == null)
@@ -77,7 +77,7 @@ namespace CoffeeApp.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteFriendRequest(Guid id)
         {
-            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/friendRequestId");
+            var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/id");
             var existingFriendRequest = await _cosmosDbService.GetItemAsync<FriendRequest>(friendRequestsContainer, id.ToString());
 
             if (existingFriendRequest == null)

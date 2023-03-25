@@ -1,7 +1,10 @@
+using CoffeeApp.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
+// Add this line to register CosmosDbService
+builder.Services.AddSingleton<CosmosDbService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

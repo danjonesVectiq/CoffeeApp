@@ -13,7 +13,8 @@ namespace CoffeeApp.Services
 
         public CosmosDbService(IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("CosmosDb");
+            var cosmosDbConfig = configuration.GetSection("CosmosDb");
+            var connectionString = cosmosDbConfig["ConnectionString"];
             _cosmosClient = new CosmosClient(connectionString);
         }
 

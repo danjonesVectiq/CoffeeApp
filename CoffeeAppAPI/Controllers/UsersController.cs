@@ -21,7 +21,7 @@ namespace CoffeeApp.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
         {
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/userId");
+            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
             var users = await _cosmosDbService.GetAllItemsAsync<User>(usersContainer);
             return Ok(users);
         }
@@ -29,7 +29,7 @@ namespace CoffeeApp.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(Guid id)
         {
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/userId");
+            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
             var user = await _cosmosDbService.GetItemAsync<User>(usersContainer, id.ToString());
 
             if (user == null)
@@ -48,21 +48,21 @@ namespace CoffeeApp.Controllers
                 return BadRequest(ModelState);
             }
 
-            user.UserId = Guid.NewGuid();
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/userId");
+            user.id = Guid.NewGuid();
+            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
             await _cosmosDbService.AddItemAsync(usersContainer, user);
-            return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user);
+            return CreatedAtAction(nameof(GetUser), new { id = user.id }, user);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateUser(Guid id, [FromBody] User user)
         {
-            if (!ModelState.IsValid || id != user.UserId)
+            if (!ModelState.IsValid || id != user.id)
             {
                 return BadRequest(ModelState);
             }
 
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/userId");
+            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/d");
             var existingUser = await _cosmosDbService.GetItemAsync<User>(usersContainer, id.ToString());
 
             if (existingUser == null)

@@ -48,16 +48,16 @@ namespace CoffeeApp.Controllers
                 return BadRequest(ModelState);
             }
 
-            checkIn.CheckinId = Guid.NewGuid();
+            checkIn.Id = Guid.NewGuid();
             var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
             await _cosmosDbService.AddItemAsync(checkInsContainer, checkIn);
-            return CreatedAtAction(nameof(GetCheckIn), new { id = checkIn.CheckinId }, checkIn);
+            return CreatedAtAction(nameof(GetCheckIn), new { id = checkIn.Id }, checkIn);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateCheckIn(Guid id, [FromBody] CheckIn checkIn)
         {
-            if (!ModelState.IsValid || id != checkIn.CheckinId)
+            if (!ModelState.IsValid || id != checkIn.Id)
             {
                 return BadRequest(ModelState);
             }

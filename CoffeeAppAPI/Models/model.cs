@@ -5,7 +5,7 @@ namespace CoffeeApp.Models
 {
     public class User
     {
-        public Guid UserId { get; set; }
+        public Guid id { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
@@ -17,13 +17,13 @@ namespace CoffeeApp.Models
         public int TotalCheckins { get; set; }
         public int TotalUniqueCoffees { get; set; }
         public int TotalBadges { get; set; }
-        public List<Guid> FavoriteCoffeeShops { get; set; }
-        public List<Guid> Friends { get; set; }
+        public List<Guid>? FavoriteCoffeeShops { get; set; }
+        public List<Guid>? Friends { get; set; }
     }
 
     public class Coffee
     {
-        public Guid CoffeeId { get; set; }
+        public Guid Id { get; set; }
         public string CoffeeName { get; set; }
         public string CoffeeType { get; set; }
         public string Origin { get; set; }
@@ -36,7 +36,7 @@ namespace CoffeeApp.Models
 
     public class CoffeeShop
     {
-        public Guid CoffeeShopId { get; set; }
+        public Guid Id { get; set; }
         public string CoffeeShopName { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
@@ -52,7 +52,7 @@ namespace CoffeeApp.Models
 
     public class CheckIn
     {
-        public Guid CheckinId { get; set; }
+        public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid CoffeeId { get; set; }
         public Guid CoffeeShopId { get; set; }
@@ -64,7 +64,7 @@ namespace CoffeeApp.Models
 
     public class Badge
     {
-        public Guid BadgeId { get; set; }
+        public Guid Id { get; set; }
         public string BadgeName { get; set; }
         public string BadgeDescription { get; set; }
         public string BadgeIconUrl { get; set; }
@@ -73,7 +73,7 @@ namespace CoffeeApp.Models
 
     public class UserBadge
     {
-        public Guid UserBadgeId { get; set; }
+        public Guid Id { get; set; }
         public Guid UserId { get; set; }
         public Guid BadgeId { get; set; }
         public DateTime DateEarned { get; set; }
@@ -81,7 +81,7 @@ namespace CoffeeApp.Models
 
     public class FriendRequest
     {
-        public Guid FriendRequestId { get; set; }
+        public Guid Id { get; set; }
         public Guid RequesterId { get; set; }
         public Guid RecipientId { get; set; }
         public string RequestStatus { get; set; }
