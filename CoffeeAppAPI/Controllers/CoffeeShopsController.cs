@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,81 +12,76 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CoffeeShopsController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly CoffeeRepository _coffeeShopsRepository;
 
         public CoffeeShopsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _coffeeShopsRepository = new CoffeeRepository(cosmosDbService);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CoffeeShop>>> GetAllCoffeeShops()
+        public async Task<ActionResult<IEnumerable<Coffee>>> GetAllCoffees()
         {
-            var coffeeShopsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CoffeeShops", "/id");
-            var coffeeShops = await _cosmosDbService.GetAllItemsAsync<CoffeeShop>(coffeeShopsContainer);
-            return Ok(coffeeShops);
+            var coffees = await _coffeeShopsRepository.GetAllCoffeesAsync();
+            return Ok(coffees);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CoffeeShop>> GetCoffeeShop(Guid id)
+        public async Task<ActionResult<Coffee>> GetCoffee(Guid id)
         {
-            var coffeeShopsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CoffeeShops", "/id");
-            var coffeeShop = await _cosmosDbService.GetItemAsync<CoffeeShop>(coffeeShopsContainer, id.ToString());
+            var coffee = await _coffeeShopsRepository.GetCoffeeAsync(id);
 
-            if (coffeeShop == null)
+            if (coffee == null)
             {
                 return NotFound();
             }
 
-            return Ok(coffeeShop);
+            return Ok(coffee);
         }
 
         [HttpPost]
-        public async Task<ActionResult<CoffeeShop>> CreateCoffeeShop([FromBody] CoffeeShop coffeeShop)
+        public async Task<ActionResult<Coffee>> CreateCoffee([FromBody] Coffee coffee)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            coffeeShop.id = Guid.NewGuid();
-            var coffeeShopsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CoffeeShops", "/id");
-            await _cosmosDbService.AddItemAsync(coffeeShopsContainer, coffeeShop);
-            return CreatedAtAction(nameof(GetCoffeeShop), new { id = coffeeShop.id }, coffeeShop);
+            coffee.id = Guid.NewGuid();
+            await _coffeeShopsRepository.CreateCoffeeAsync(coffee);
+            return CreatedAtAction(nameof(GetCoffee), new { id = coffee.id }, coffee);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateCoffeeShop(Guid id, [FromBody] CoffeeShop coffeeShop)
+        public async Task<ActionResult> UpdateCoffee(Guid id, [FromBody] Coffee coffee)
         {
-            if (!ModelState.IsValid || id != coffeeShop.id)
+            if (!ModelState.IsValid || id != coffee.id)
             {
                 return BadRequest(ModelState);
             }
 
-            var coffeeShopsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CoffeeShops", "/id");
-            var existingCoffeeShop = await _cosmosDbService.GetItemAsync<CoffeeShop>(coffeeShopsContainer, id.ToString());
+            var existingCoffee = await _coffeeShopsRepository.GetCoffeeAsync(id);
 
-            if (existingCoffeeShop == null)
+            if (existingCoffee == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(coffeeShopsContainer, id.ToString(), coffeeShop);
+            await _coffeeShopsRepository.UpdateCoffeeAsync(coffee);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteCoffeeShop(Guid id)
+        public async Task<ActionResult> DeleteCoffee(Guid id)
         {
-            var coffeeShopsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CoffeeShops", "/id");
-            var existingCoffeeShop = await _cosmosDbService.GetItemAsync<CoffeeShop>(coffeeShopsContainer, id.ToString());
+            var existingCoffee = await _coffeeShopsRepository.GetCoffeeAsync(id);
 
-            if (existingCoffeeShop == null)
+            if (existingCoffee == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<CoffeeShop>(coffeeShopsContainer, id.ToString());
+            await _coffeeShopsRepository.DeleteCoffeeAsync(id);
             return NoContent();
         }
     }

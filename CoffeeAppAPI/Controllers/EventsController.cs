@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class EventsController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly EventRepository _eventRepository;
 
         public EventsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _eventRepository = new EventRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Event>>> GetAllEvents()
         {
-            var eventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Events", "/id");
-            var events = await _cosmosDbService.GetAllItemsAsync<Event>(eventsContainer);
+            var events = await _eventRepository.GetAllEventsAsync();
             return Ok(events);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Event>> GetEvent(Guid id)
         {
-            var eventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Events", "/id");
-            var eventItem = await _cosmosDbService.GetItemAsync<Event>(eventsContainer, id.ToString());
+            var eventItem = await _eventRepository.GetEventAsync(id);
 
             if (eventItem == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             eventItem.id = Guid.NewGuid();
-            var eventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Events", "/id");
-            await _cosmosDbService.AddItemAsync(eventsContainer, eventItem);
+            await _eventRepository.CreateEventAsync(eventItem);
             return CreatedAtAction(nameof(GetEvent), new { id = eventItem.id }, eventItem);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var eventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Events", "/id");
-            var existingEvent = await _cosmosDbService.GetItemAsync<Event>(eventsContainer, id.ToString());
+            var existingEvent = await _eventRepository.GetEventAsync(id);
 
             if (existingEvent == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(eventsContainer, id.ToString(), eventItem);
+            await _eventRepository.UpdateEventAsync(eventItem);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteEvent(Guid id)
         {
-            var eventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Events", "/id");
-            var existingEvent = await _cosmosDbService.GetItemAsync<Event>(eventsContainer, id.ToString());
+            var existingEvent = await _eventRepository.GetEventAsync(id);
 
             if (existingEvent == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<Event>(eventsContainer, id.ToString());
+            await _eventRepository.DeleteEventAsync(id);
             return NoContent();
         }
     }

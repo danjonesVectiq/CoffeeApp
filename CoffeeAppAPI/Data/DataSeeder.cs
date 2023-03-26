@@ -20,14 +20,18 @@ namespace CoffeeAppAPI.Data
         }
         public async Task SeedData()
         {
-            var users = GenerateUsers(10);
-            await SeedUsers(users);
-
             var coffees = GenerateCoffees(10);
             await SeedCoffees(coffees);
 
             var coffeeShops = GenerateCoffeeShops(10, coffees);
             await SeedCoffeeShops(coffeeShops);
+
+            List<Guid> coffeeShopIds = coffeeShops.Select(c => c.id).ToList();
+            var users = GenerateUsers(coffeeShopIds, 10);
+            await SeedUsers(users);
+
+
+
 
             var checkins = GenerateCheckIns(users, coffees, coffeeShops, 10);
             await SeedCheckins(checkins);
@@ -55,6 +59,7 @@ namespace CoffeeAppAPI.Data
 
             var coffeeLists = GenerateCoffeeLists(users, coffees, 10);
             await SeedCoffeeLists(coffeeLists);
+
             var events = GenerateEvents(coffeeShops, users, 10);
             await SeedEvents(events);
 
@@ -79,17 +84,61 @@ namespace CoffeeAppAPI.Data
             }
         }
 
-        private List<CoffeeAppAPI.Models.User> GenerateUsers(int count)
+        private List<CoffeeAppAPI.Models.User> GenerateUsers(List<Guid> coffeeShopIds, int count)
         {
+            var coffeeTypes = new List<string> { "Espresso", "Latte", "Cappuccino", "Americano", "Mocha" };
+            var roastLevels = new List<string> { "Light", "Medium", "Medium-Dark", "Dark", "Extra Dark", };
+            var flavorNotes = new List<string> { "Chocolate", "Fruity", "Floral", "Nutty", "Spicy", "Sweet" };
+            var origins = new List<string> { "Colombia", "Ethiopia", "Brazil", "Guatemala", "Kenya" };
+            var brewingMethods = new List<string> { "Pour Over", "French Press", "Aeropress", "Espresso Machine", "Cold Brew" };
+
+
             // Generate a list of fake users using Bogus
             return new Faker<CoffeeAppAPI.Models.User>()
-            .RuleFor(u => u.id, f => f.Random.Guid())
-            .RuleFor(u => u.FirstName, f => f.Name.FirstName())
-            .RuleFor(u => u.LastName, f => f.Name.LastName())
-            .RuleFor(u => u.Email, (f, u) => f.Internet.Email(u.FirstName, u.LastName))
-            .RuleFor(u => u.Password, f => f.Internet.Password())
-            .RuleFor(u => u.JoinDate, f => f.Date.Past())
-
+                .RuleFor(u => u.id, f => f.Random.Guid())
+                .RuleFor(u => u.FirstName, f => f.Name.FirstName())
+                .RuleFor(u => u.LastName, f => f.Name.LastName())
+                .RuleFor(u => u.Username, (f, u) => f.Internet.UserName(u.FirstName, u.LastName))
+                .RuleFor(u => u.Email, (f, u) => f.Internet.Email(u.FirstName, u.LastName))
+                .RuleFor(u => u.Password, f => f.Internet.Password())
+                .RuleFor(u => u.JoinDate, f => f.Date.Past())
+                .RuleFor(u => u.Bio, f => f.Lorem.Sentence())
+                .RuleFor(u => u.ProfilePictureUrl, f => f.Internet.Avatar())
+                .RuleFor(u => u.TotalCheckins, f => f.Random.Number(1, 100))
+                .RuleFor(u => u.TotalUniqueCoffees, f => f.Random.Number(1, 50))
+                .RuleFor(u => u.TotalBadges, f => f.Random.Number(1, 20))
+            .RuleFor(u => u.FavoriteCoffeeShops, f => f.PickRandom(coffeeShopIds, 3).ToList())
+                //.RuleFor(u => u.Friends, f => f.Random.Guid().ToList(5)) Need to  generate a list of friends first implement later
+                .RuleFor(u => u.CoffeeTypePreferences, f => f.Make(3, () => new CoffeeTypePreference
+                {
+                    id = f.Random.Guid(),
+                    CoffeeType = f.PickRandom(coffeeTypes),
+                    Importance = f.Random.Number(1, 5)
+                }))
+                .RuleFor(u => u.RoastLevelPreferences, f => f.Make(3, () => new RoastLevelPreference
+                {
+                    id = f.Random.Guid(),
+                    RoastLevel = f.PickRandom(roastLevels),
+                    Importance = f.Random.Number(1, 5)
+                }))
+                .RuleFor(u => u.FlavorNotePreferences, f => f.Make(3, () => new FlavorNotePreference
+                {
+                    id = f.Random.Guid(),
+                    FlavorNote = f.PickRandom(flavorNotes),
+                    Importance = f.Random.Number(1, 5)
+                }))
+                .RuleFor(u => u.OriginPreferences, f => f.Make(3, () => new OriginPreference
+                {
+                    id = f.Random.Guid(),
+                    Origin = f.PickRandom(origins),
+                    Importance = f.Random.Number(1, 5)
+                }))
+                .RuleFor(u => u.BrewingMethodPreferences, f => f.Make(3, () => new BrewingMethodPreference
+                {
+                    id = f.Random.Guid(),
+                    BrewingMethod = f.PickRandom(brewingMethods),
+                    Importance = f.Random.Number(1, 5)
+                }))
                 .Generate(count);
         }
 
@@ -141,8 +190,6 @@ namespace CoffeeAppAPI.Data
                 .RuleFor(ch => ch.UserId, f => f.PickRandom(users).id)
                 .RuleFor(ch => ch.CoffeeId, f => f.PickRandom(coffees).id)
                 .RuleFor(ch => ch.CoffeeShopId, f => f.PickRandom(coffeeShops).id)
-                .RuleFor(ch => ch.Rating, f => f.Random.Number(1, 5))
-                .RuleFor(ch => ch.ReviewText, f => f.Lorem.Paragraph())
                 .RuleFor(ch => ch.CheckinDate, f => f.Date.Past())
                 .RuleFor(ch => ch.CheckinPhotos, f => new List<string>()) // You can populate this with image URLs
                 .Generate(count);

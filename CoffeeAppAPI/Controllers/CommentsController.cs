@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CommentsController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly CommentRepository _commentRepository;
 
         public CommentsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _commentRepository = new CommentRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Comment>>> GetAllComments()
         {
-            var commentsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Comments", "/id");
-            var comments = await _cosmosDbService.GetAllItemsAsync<Comment>(commentsContainer);
+            var comments = await _commentRepository.GetAllCommentsAsync();
             return Ok(comments);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Comment>> GetComment(Guid id)
         {
-            var commentsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Comments", "/id");
-            var comment = await _cosmosDbService.GetItemAsync<Comment>(commentsContainer, id.ToString());
+            var comment = await _commentRepository.GetCommentAsync(id);
 
             if (comment == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             comment.id = Guid.NewGuid();
-            var commentsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Comments", "/id");
-            await _cosmosDbService.AddItemAsync(commentsContainer, comment);
+            await _commentRepository.CreateCommentAsync(comment);
             return CreatedAtAction(nameof(GetComment), new { id = comment.id }, comment);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var commentsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Comments", "/id");
-            var existingComment = await _cosmosDbService.GetItemAsync<Comment>(commentsContainer, id.ToString());
+            var existingComment = await _commentRepository.GetCommentAsync(id);
 
             if (existingComment == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(commentsContainer, id.ToString(), comment);
+            await _commentRepository.UpdateCommentAsync(comment);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteComment(Guid id)
         {
-            var commentsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Comments", "/id");
-            var existingComment = await _cosmosDbService.GetItemAsync<Comment>(commentsContainer, id.ToString());
+            var existingComment = await _commentRepository.GetCommentAsync(id);
 
             if (existingComment == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<Comment>(commentsContainer, id.ToString());
+            await _commentRepository.DeleteCommentAsync(id);
             return NoContent();
         }
     }

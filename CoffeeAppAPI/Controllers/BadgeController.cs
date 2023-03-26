@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class BadgesController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly BadgeRepository _badgeRepository;
 
         public BadgesController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _badgeRepository = new BadgeRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Badge>>> GetAllBadges()
         {
-            var badgesContainer = await _cosmosDbService.GetOrCreateContainerAsync("Badges", "/id");
-            var badges = await _cosmosDbService.GetAllItemsAsync<Badge>(badgesContainer);
+            var badges = await _badgeRepository.GetAllBadgesAsync();
             return Ok(badges);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Badge>> GetBadge(Guid id)
         {
-            var badgesContainer = await _cosmosDbService.GetOrCreateContainerAsync("Badges", "/id");
-            var badge = await _cosmosDbService.GetItemAsync<Badge>(badgesContainer, id.ToString());
+            var badge = await _badgeRepository.GetBadgeAsync(id);
 
             if (badge == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             badge.id = Guid.NewGuid();
-            var badgesContainer = await _cosmosDbService.GetOrCreateContainerAsync("Badges", "/id");
-            await _cosmosDbService.AddItemAsync(badgesContainer, badge);
+            await _badgeRepository.CreateBadgeAsync(badge);
             return CreatedAtAction(nameof(GetBadge), new { id = badge.id }, badge);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var badgesContainer = await _cosmosDbService.GetOrCreateContainerAsync("Badges", "/id");
-            var existingBadge = await _cosmosDbService.GetItemAsync<Badge>(badgesContainer, id.ToString());
+            var existingBadge = await _badgeRepository.GetBadgeAsync(id);
 
             if (existingBadge == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(badgesContainer, id.ToString(), badge);
+            await _badgeRepository.UpdateBadgeAsync(badge);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteBadge(Guid id)
         {
-            var badgesContainer = await _cosmosDbService.GetOrCreateContainerAsync("Badges", "/id");
-            var existingBadge = await _cosmosDbService.GetItemAsync<Badge>(badgesContainer, id.ToString());
+            var existingBadge = await _badgeRepository.GetBadgeAsync(id);
 
             if (existingBadge == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<Badge>(badgesContainer, id.ToString());
+            await _badgeRepository.DeleteBadgeAsync(id);
             return NoContent();
         }
     }

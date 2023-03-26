@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class ReviewLikesController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly ReviewLikeRepository _reviewLikeRepository;
 
         public ReviewLikesController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _reviewLikeRepository = new ReviewLikeRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReviewLike>>> GetAllReviewLikes()
         {
-            var reviewLikesContainer = await _cosmosDbService.GetOrCreateContainerAsync("ReviewLikes", "/id");
-            var reviewLikes = await _cosmosDbService.GetAllItemsAsync<ReviewLike>(reviewLikesContainer);
+            var reviewLikes = await _reviewLikeRepository.GetAllReviewLikesAsync();
             return Ok(reviewLikes);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ReviewLike>> GetReviewLike(Guid id)
         {
-            var reviewLikesContainer = await _cosmosDbService.GetOrCreateContainerAsync("ReviewLikes", "/id");
-            var reviewLike = await _cosmosDbService.GetItemAsync<ReviewLike>(reviewLikesContainer, id.ToString());
+            var reviewLike = await _reviewLikeRepository.GetReviewLikeAsync(id);
 
             if (reviewLike == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             reviewLike.id = Guid.NewGuid();
-            var reviewLikesContainer = await _cosmosDbService.GetOrCreateContainerAsync("ReviewLikes", "/id");
-            await _cosmosDbService.AddItemAsync(reviewLikesContainer, reviewLike);
+            await _reviewLikeRepository.CreateReviewLikeAsync(reviewLike);
             return CreatedAtAction(nameof(GetReviewLike), new { id = reviewLike.id }, reviewLike);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var reviewLikesContainer = await _cosmosDbService.GetOrCreateContainerAsync("ReviewLikes", "/id");
-            var existingReviewLike = await _cosmosDbService.GetItemAsync<ReviewLike>(reviewLikesContainer, id.ToString());
+            var existingReviewLike = await _reviewLikeRepository.GetReviewLikeAsync(id);
 
             if (existingReviewLike == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(reviewLikesContainer, id.ToString(), reviewLike);
+            await _reviewLikeRepository.UpdateReviewLikeAsync(reviewLike);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteReviewLike(Guid id)
         {
-            var reviewLikesContainer = await _cosmosDbService.GetOrCreateContainerAsync("ReviewLikes", "/id");
-            var existingReviewLike = await _cosmosDbService.GetItemAsync<ReviewLike>(reviewLikesContainer, id.ToString());
+            var existingReviewLike = await _reviewLikeRepository.GetReviewLikeAsync(id);
 
             if (existingReviewLike == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<ReviewLike>(reviewLikesContainer, id.ToString());
+            await _reviewLikeRepository.DeleteReviewLikeAsync(id);
             return NoContent();
         }
     }

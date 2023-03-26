@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CheckInsController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly CheckInRepository _checkInRepository;
 
         public CheckInsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _checkInRepository = new CheckInRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CheckIn>>> GetAllCheckIns()
         {
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            var checkIns = await _cosmosDbService.GetAllItemsAsync<CheckIn>(checkInsContainer);
+            var checkIns = await _checkInRepository.GetAllCheckInsAsync();
             return Ok(checkIns);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CheckIn>> GetCheckIn(Guid id)
         {
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            var checkIn = await _cosmosDbService.GetItemAsync<CheckIn>(checkInsContainer, id.ToString());
+            var checkIn = await _checkInRepository.GetCheckInAsync(id);
 
             if (checkIn == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             checkIn.id = Guid.NewGuid();
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            await _cosmosDbService.AddItemAsync(checkInsContainer, checkIn);
+            await _checkInRepository.CreateCheckInAsync(checkIn);
             return CreatedAtAction(nameof(GetCheckIn), new { id = checkIn.id }, checkIn);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            var existingCheckIn = await _cosmosDbService.GetItemAsync<CheckIn>(checkInsContainer, id.ToString());
+            var existingCheckIn = await _checkInRepository.GetCheckInAsync(id);
 
             if (existingCheckIn == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(checkInsContainer, id.ToString(), checkIn);
+            await _checkInRepository.UpdateCheckInAsync(checkIn);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCheckIn(Guid id)
         {
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            var existingCheckIn = await _cosmosDbService.GetItemAsync<CheckIn>(checkInsContainer, id.ToString());
+            var existingCheckIn = await _checkInRepository.GetCheckInAsync(id);
 
             if (existingCheckIn == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<CheckIn>(checkInsContainer, id.ToString());
+            await _checkInRepository.DeleteCheckInAsync(id);
             return NoContent();
         }
     }

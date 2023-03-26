@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class NotificationsController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly NotificationRepository _notificationRepository;
 
         public NotificationsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _notificationRepository = new NotificationRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Notification>>> GetAllNotifications()
         {
-            var notificationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Notifications", "/id");
-            var notifications = await _cosmosDbService.GetAllItemsAsync<Notification>(notificationsContainer);
+            var notifications = await _notificationRepository.GetAllNotificationsAsync();
             return Ok(notifications);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Notification>> GetNotification(Guid id)
         {
-            var notificationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Notifications", "/id");
-            var notification = await _cosmosDbService.GetItemAsync<Notification>(notificationsContainer, id.ToString());
+            var notification = await _notificationRepository.GetNotificationAsync(id);
 
             if (notification == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             notification.id = Guid.NewGuid();
-            var notificationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Notifications", "/id");
-            await _cosmosDbService.AddItemAsync(notificationsContainer, notification);
+            await _notificationRepository.CreateNotificationAsync(notification);
             return CreatedAtAction(nameof(GetNotification), new { id = notification.id }, notification);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var notificationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Notifications", "/id");
-            var existingNotification = await _cosmosDbService.GetItemAsync<Notification>(notificationsContainer, id.ToString());
+            var existingNotification = await _notificationRepository.GetNotificationAsync(id);
 
             if (existingNotification == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(notificationsContainer, id.ToString(), notification);
+            await _notificationRepository.UpdateNotificationAsync(notification);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteNotification(Guid id)
         {
-            var notificationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Notifications", "/id");
-            var existingNotification = await _cosmosDbService.GetItemAsync<Notification>(notificationsContainer, id.ToString());
+            var existingNotification = await _notificationRepository.GetNotificationAsync(id);
 
             if (existingNotification == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<Notification>(notificationsContainer, id.ToString());
+            await _notificationRepository.DeleteNotificationAsync(id);
             return NoContent();
         }
     }

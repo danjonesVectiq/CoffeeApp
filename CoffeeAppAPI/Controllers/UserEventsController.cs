@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class UserEventsController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly UserEventRepository _userEventRepository;
 
         public UserEventsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _userEventRepository = new UserEventRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserEvent>>> GetAllUserEvents()
         {
-            var userEventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserEvents", "/id");
-            var userEvents = await _cosmosDbService.GetAllItemsAsync<UserEvent>(userEventsContainer);
+            var userEvents = await _userEventRepository.GetAllUserEventsAsync();
             return Ok(userEvents);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserEvent>> GetUserEvent(Guid id)
         {
-            var userEventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserEvents", "/id");
-            var userEvent = await _cosmosDbService.GetItemAsync<UserEvent>(userEventsContainer, id.ToString());
+            var userEvent = await _userEventRepository.GetUserEventAsync(id);
 
             if (userEvent == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             userEvent.id = Guid.NewGuid();
-            var userEventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserEvents", "/id");
-            await _cosmosDbService.AddItemAsync(userEventsContainer, userEvent);
+            await _userEventRepository.CreateUserEventAsync(userEvent);
             return CreatedAtAction(nameof(GetUserEvent), new { id = userEvent.id }, userEvent);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userEventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserEvents", "/id");
-            var existingUserEvent = await _cosmosDbService.GetItemAsync<UserEvent>(userEventsContainer, id.ToString());
+            var existingUserEvent = await _userEventRepository.GetUserEventAsync(id);
 
             if (existingUserEvent == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(userEventsContainer, id.ToString(), userEvent);
+            await _userEventRepository.UpdateUserEventAsync(userEvent);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUserEvent(Guid id)
         {
-            var userEventsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserEvents", "/id");
-            var existingUserEvent = await _cosmosDbService.GetItemAsync<UserEvent>(userEventsContainer, id.ToString());
+            var existingUserEvent = await _userEventRepository.GetUserEventAsync(id);
 
             if (existingUserEvent == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<UserEvent>(userEventsContainer, id.ToString());
+            await _userEventRepository.DeleteUserEventAsync(id);
             return NoContent();
         }
     }

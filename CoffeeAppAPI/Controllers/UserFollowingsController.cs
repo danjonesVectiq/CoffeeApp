@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class UserFollowingsController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly UserFollowingRepository _userFollowingRepository;
 
         public UserFollowingsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _userFollowingRepository = new UserFollowingRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserFollowing>>> GetAllUserFollowings()
         {
-            var userFollowingsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserFollowings", "/id");
-            var userFollowings = await _cosmosDbService.GetAllItemsAsync<UserFollowing>(userFollowingsContainer);
+            var userFollowings = await _userFollowingRepository.GetAllUserFollowingsAsync();
             return Ok(userFollowings);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserFollowing>> GetUserFollowing(Guid id)
         {
-            var userFollowingsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserFollowings", "/id");
-            var userFollowing = await _cosmosDbService.GetItemAsync<UserFollowing>(userFollowingsContainer, id.ToString());
+            var userFollowing = await _userFollowingRepository.GetUserFollowingAsync(id);
 
             if (userFollowing == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             userFollowing.id = Guid.NewGuid();
-            var userFollowingsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserFollowings", "/id");
-            await _cosmosDbService.AddItemAsync(userFollowingsContainer, userFollowing);
+            await _userFollowingRepository.CreateUserFollowingAsync(userFollowing);
             return CreatedAtAction(nameof(GetUserFollowing), new { id = userFollowing.id }, userFollowing);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userFollowingsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserFollowings", "/id");
-            var existingUserFollowing = await _cosmosDbService.GetItemAsync<UserFollowing>(userFollowingsContainer, id.ToString());
+            var existingUserFollowing = await _userFollowingRepository.GetUserFollowingAsync(id);
 
             if (existingUserFollowing == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(userFollowingsContainer, id.ToString(), userFollowing);
+            await _userFollowingRepository.UpdateUserFollowingAsync(userFollowing);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUserFollowing(Guid id)
         {
-            var userFollowingsContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserFollowings", "/id");
-            var existingUserFollowing = await _cosmosDbService.GetItemAsync<UserFollowing>(userFollowingsContainer, id.ToString());
+            var existingUserFollowing = await _userFollowingRepository.GetUserFollowingAsync(id);
 
             if (existingUserFollowing == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<UserFollowing>(userFollowingsContainer, id.ToString());
+            await _userFollowingRepository.DeleteUserFollowingAsync(id);
             return NoContent();
         }
     }

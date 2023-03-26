@@ -19,6 +19,11 @@ namespace CoffeeAppAPI.Models
         public int TotalBadges { get; set; }
         public List<Guid>? FavoriteCoffeeShops { get; set; }
         public List<Guid>? Friends { get; set; }
+        public List<CoffeeTypePreference> CoffeeTypePreferences { get; set; }
+        public List<RoastLevelPreference> RoastLevelPreferences { get; set; }
+        public List<FlavorNotePreference> FlavorNotePreferences { get; set; }
+        public List<OriginPreference> OriginPreferences { get; set; }
+        public List<BrewingMethodPreference> BrewingMethodPreferences { get; set; }
     }
 
     public class Coffee
@@ -32,6 +37,10 @@ namespace CoffeeAppAPI.Models
         public List<string> FlavorNotes { get; set; }
         public double AverageRating { get; set; }
         public int TotalRatings { get; set; }
+
+        public List<CheckInCoffee> CheckInCoffees { get; set; }
+
+
     }
 
     public class CoffeeShop
@@ -50,16 +59,27 @@ namespace CoffeeAppAPI.Models
         public List<Guid> AvailableCoffees { get; set; }
     }
 
+
+//Visit to a CoffeeShop
     public class CheckIn
     {
         public Guid id { get; set; }
         public Guid UserId { get; set; }
         public Guid CoffeeId { get; set; }
         public Guid CoffeeShopId { get; set; }
-        public int Rating { get; set; }
-        public string ReviewText { get; set; }
         public DateTime CheckinDate { get; set; }
         public List<string> CheckinPhotos { get; set; }
+        public List<CheckInCoffee> CheckInCoffees { get; set; }
+    }
+
+//Coffess that were consumed during a CheckIn
+    public class CheckInCoffee
+    {
+        public Guid id { get; set; }
+        public Guid CheckInId { get; set; }
+        public CheckIn CheckIn { get; set; }
+        public Guid CoffeeId { get; set; }
+        public Coffee Coffee { get; set; }
     }
 
     public class Badge
@@ -88,24 +108,40 @@ namespace CoffeeAppAPI.Models
         public DateTime RequestDate { get; set; }
     }
 
-    public class Review
-    {
-        public Guid id { get; set; }
-        public Guid UserId { get; set; }
-        public Guid CoffeeId { get; set; }
-        public Guid CoffeeShopId { get; set; }
-        public int Rating { get; set; }
-        public string ReviewText { get; set; }
-        public DateTime ReviewDate { get; set; }
-        public int ReviewLikesCount { get; set; }
-    }
-    public class ReviewLike
-    {
-        public Guid id { get; set; }
-        public Guid UserId { get; set; }
-        public Guid ReviewId { get; set; }
-        public DateTime LikedDate { get; set; }
-    }
+public class CoffeeShopReview
+{
+    public Guid id { get; set; }
+    public Guid UserId { get; set; }
+    public Guid CoffeeShopId { get; set; }
+    public int Rating { get; set; }
+    public double NormalizedRating { get; set; }
+    public string ReviewText { get; set; }
+    public DateTime ReviewDate { get; set; }
+    public int ReviewLikesCount { get; set; }
+}
+
+public class Review
+{
+    public Guid id { get; set; }
+    public Guid UserId { get; set; }
+    public Guid CoffeeId { get; set; }
+    // This is nullable because a review can be for a coffee, or for a coffee at a coffee shop
+    public Guid? CoffeeShopId { get; set; }
+    public int Rating { get; set; }
+    public double NormalizedRating { get; set; }
+    public string ReviewText { get; set; }
+    public DateTime ReviewDate { get; set; }
+    public int ReviewLikesCount { get; set; }
+}
+    //Likes on a Review
+   public class ReviewLike
+{
+    public Guid id { get; set; }
+    public Guid UserId { get; set; }
+    public Guid? ReviewId { get; set; } // For coffee reviews - can be null if it's a coffee shop review
+    public Guid? CoffeeShopReviewId { get; set; } // For coffee shop reviews - can be null if it's a coffee review
+    public DateTime LikedDate { get; set; }
+}
 
     public class Comment
     {
@@ -143,7 +179,7 @@ namespace CoffeeAppAPI.Models
         public string EventLocation { get; set; }
         public Guid CoffeeShopId { get; set; }
         public Guid OrganizerId { get; set; }
-    }   
+    }
 
     public class UserEvent
     {
@@ -152,7 +188,7 @@ namespace CoffeeAppAPI.Models
         public Guid EventId { get; set; }
         public string Status { get; set; }
     }
- public class Notification
+    public class Notification
     {
         public Guid id { get; set; }
         public Guid UserId { get; set; }

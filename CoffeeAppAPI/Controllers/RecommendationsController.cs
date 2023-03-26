@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,26 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class RecommendationsController : ControllerBase
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly RecommendationRepository _recommendationRepository;
 
         public RecommendationsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _recommendationRepository = new RecommendationRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Recommendation>>> GetAllRecommendations()
         {
-            var recommendationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Recommendations", "/id");
-            var recommendations = await _cosmosDbService.GetAllItemsAsync<Recommendation>(recommendationsContainer);
+            var recommendations = await _recommendationRepository.GetAllRecommendationsAsync();
             return Ok(recommendations);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Recommendation>> GetRecommendation(Guid id)
         {
-            var recommendationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Recommendations", "/id");
-            var recommendation = await _cosmosDbService.GetItemAsync<Recommendation>(recommendationsContainer, id.ToString());
+            var recommendation = await _recommendationRepository.GetRecommendationAsync(id);
 
             if (recommendation == null)
             {
@@ -49,8 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             recommendation.id = Guid.NewGuid();
-            var recommendationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Recommendations", "/id");
-            await _cosmosDbService.AddItemAsync(recommendationsContainer, recommendation);
+            await _recommendationRepository.CreateRecommendationAsync(recommendation);
             return CreatedAtAction(nameof(GetRecommendation), new { id = recommendation.id }, recommendation);
         }
 
@@ -62,30 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var recommendationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Recommendations", "/id");
-            var existingRecommendation = await _cosmosDbService.GetItemAsync<Recommendation>(recommendationsContainer, id.ToString());
+            var existingRecommendation = await _recommendationRepository.GetRecommendationAsync(id);
 
             if (existingRecommendation == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(recommendationsContainer, id.ToString(), recommendation);
+            await _recommendationRepository.UpdateRecommendationAsync(recommendation);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteRecommendation(Guid id)
         {
-            var recommendationsContainer = await _cosmosDbService.GetOrCreateContainerAsync("Recommendations", "/id");
-            var existingRecommendation = await _cosmosDbService.GetItemAsync<Recommendation>(recommendationsContainer, id.ToString());
+            var existingRecommendation = await _recommendationRepository.GetRecommendationAsync(id);
 
             if (existingRecommendation == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<Recommendation>(recommendationsContainer, id.ToString());
+            await _recommendationRepository.DeleteRecommendationAsync(id);
             return NoContent();
         }
     }
