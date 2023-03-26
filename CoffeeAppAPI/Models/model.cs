@@ -87,4 +87,119 @@ namespace CoffeeAppAPI.Models
         public string RequestStatus { get; set; }
         public DateTime RequestDate { get; set; }
     }
+
+    public class Review
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CoffeeId { get; set; }
+        public Guid CoffeeShopId { get; set; }
+        public int Rating { get; set; }
+        public string ReviewText { get; set; }
+        public DateTime ReviewDate { get; set; }
+        public int ReviewLikesCount { get; set; }
+    }
+    public class ReviewLike
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid ReviewId { get; set; }
+        public DateTime LikedDate { get; set; }
+    }
+
+    public class Comment
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid ReviewId { get; set; }
+        public string CommentText { get; set; }
+        public DateTime CommentDate { get; set; }
+    }
+
+    public class UserFollowing
+    {
+        public Guid id { get; set; }
+        public Guid FollowerId { get; set; }
+        public Guid FolloweeId { get; set; }
+        public DateTime FollowDate { get; set; }
+    }
+
+    public class CoffeeList
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public string ListName { get; set; }
+        public string ListDescription { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public List<Guid> Coffees { get; set; }
+    }
+
+    public class Event
+    {
+        public Guid id { get; set; }
+        public string EventName { get; set; }
+        public string EventDescription { get; set; }
+        public DateTime EventDate { get; set; }
+        public string EventLocation { get; set; }
+        public Guid CoffeeShopId { get; set; }
+        public Guid OrganizerId { get; set; }
+    }   
+
+    public class UserEvent
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid EventId { get; set; }
+        public string Status { get; set; }
+    }
+ public class Notification
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public string NotificationType { get; set; }
+        public string Content { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public bool IsRead { get; set; }
+    }
+
+    public class Recommendation
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CoffeeId { get; set; }
+        public Guid RecommendedBy { get; set; }
+        public string RecommendationReason { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    public class CoffeeShopPhoto
+    {
+        public Guid id { get; set; }
+        public Guid CoffeeShopId { get; set; }
+        public Guid UserId { get; set; }
+        public string PhotoUrl { get; set; }
+        public string Description { get; set; }
+        public DateTime UploadDate { get; set; }
+    }
+
+    public class CoffeePhoto
+    {
+        public Guid id { get; set; }
+        public Guid CoffeeId { get; set; }
+        public Guid UserId { get; set; }
+        public string PhotoUrl { get; set; }
+        public string Description { get; set; }
+        public DateTime UploadDate { get; set; }
+    }
+
+    public class UserPhoto
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public string PhotoUrl { get; set; }
+        public string Description { get; set; }
+        public DateTime UploadDate { get; set; }
+    }
+
+
 }
