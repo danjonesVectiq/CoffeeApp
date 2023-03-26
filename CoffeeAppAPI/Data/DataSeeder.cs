@@ -20,7 +20,7 @@ namespace CoffeeAppAPI.Data
         }
         public async Task SeedData()
         {
-           var users = GenerateUsers(10);
+            var users = GenerateUsers(10);
             await SeedUsers(users);
 
             var coffees = GenerateCoffees(10);
@@ -32,14 +32,14 @@ namespace CoffeeAppAPI.Data
             var checkins = GenerateCheckIns(users, coffees, coffeeShops, 10);
             await SeedCheckins(checkins);
 
-            var badges = GenerateBadges(5);
+            var badges = GenerateBadges(20);
             await SeedBadges(badges);
 
-           var userBadges = GenerateUserBadges(users, badges, 10);
+            var userBadges = GenerateUserBadges(users, badges, 40);
             await SeedUserBadges(userBadges);
 
-             var friendRequests = GenerateFriendRequests(users, 10);
-             await SeedFriendRequests(friendRequests);
+            var friendRequests = GenerateFriendRequests(users, 5);
+            await SeedFriendRequests(friendRequests);
         }
 
         private async Task SeedUsers(List<CoffeeAppAPI.Models.User> users)
