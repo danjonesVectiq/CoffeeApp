@@ -64,7 +64,7 @@ namespace CoffeeAppAPI.Models
 
     public class Badge
     {
-        public Guid Id { get; set; }
+        public Guid id { get; set; }
         public string BadgeName { get; set; }
         public string BadgeDescription { get; set; }
         public string BadgeIconUrl { get; set; }
@@ -73,7 +73,7 @@ namespace CoffeeAppAPI.Models
 
     public class UserBadge
     {
-        public Guid Id { get; set; }
+        public Guid id { get; set; }
         public Guid UserId { get; set; }
         public Guid BadgeId { get; set; }
         public DateTime DateEarned { get; set; }
@@ -81,7 +81,7 @@ namespace CoffeeAppAPI.Models
 
     public class FriendRequest
     {
-        public Guid Id { get; set; }
+        public Guid id { get; set; }
         public Guid RequesterId { get; set; }
         public Guid RecipientId { get; set; }
         public string RequestStatus { get; set; }

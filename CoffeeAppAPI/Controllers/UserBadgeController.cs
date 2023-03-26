@@ -48,16 +48,16 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            userBadge.Id = Guid.NewGuid();
+            userBadge.id = Guid.NewGuid();
             var userBadgesContainer = await _cosmosDbService.GetOrCreateContainerAsync("UserBadges", "/id");
             await _cosmosDbService.AddItemAsync(userBadgesContainer, userBadge);
-            return CreatedAtAction(nameof(GetUserBadge), new { id = userBadge.Id }, userBadge);
+            return CreatedAtAction(nameof(GetUserBadge), new { id = userBadge.id }, userBadge);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateUserBadge(Guid id, [FromBody] UserBadge userBadge)
         {
-            if (!ModelState.IsValid || id != userBadge.Id)
+            if (!ModelState.IsValid || id != userBadge.id)
             {
                 return BadRequest(ModelState);
             }

@@ -37,7 +37,7 @@ if (args.Contains("--seed"))
     using (var scope = app.Services.CreateScope())
     {
         var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-        //await dataSeeder.CleanUpData(); // Clean up existing data
+        await dataSeeder.CleanUpData(); // Clean up existing data
         await dataSeeder.SeedData(); // Seed new data
     }
 }

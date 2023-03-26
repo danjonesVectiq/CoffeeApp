@@ -11,9 +11,9 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class BadgesController : ControllerBase
     {
-        private readonly CosmosDbService _cosmosDbService;
+        private readonly ICosmosDbService _cosmosDbService;
 
-        public BadgesController(CosmosDbService cosmosDbService)
+        public BadgesController(ICosmosDbService cosmosDbService)
         {
             _cosmosDbService = cosmosDbService;
         }
@@ -48,16 +48,16 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            badge.Id = Guid.NewGuid();
+            badge.id = Guid.NewGuid();
             var badgesContainer = await _cosmosDbService.GetOrCreateContainerAsync("Badges", "/id");
             await _cosmosDbService.AddItemAsync(badgesContainer, badge);
-            return CreatedAtAction(nameof(GetBadge), new { id = badge.Id }, badge);
+            return CreatedAtAction(nameof(GetBadge), new { id = badge.id }, badge);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateBadge(Guid id, [FromBody] Badge badge)
         {
-            if (!ModelState.IsValid || id != badge.Id)
+            if (!ModelState.IsValid || id != badge.id)
             {
                 return BadRequest(ModelState);
             }

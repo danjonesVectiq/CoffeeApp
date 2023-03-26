@@ -48,16 +48,16 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            friendRequest.Id = Guid.NewGuid();
+            friendRequest.id = Guid.NewGuid();
             var friendRequestsContainer = await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/id");
             await _cosmosDbService.AddItemAsync(friendRequestsContainer, friendRequest);
-            return CreatedAtAction(nameof(GetFriendRequest), new { id = friendRequest.Id }, friendRequest);
+            return CreatedAtAction(nameof(GetFriendRequest), new { id = friendRequest.id }, friendRequest);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateFriendRequest(Guid id, [FromBody] FriendRequest friendRequest)
         {
-            if (!ModelState.IsValid || id != friendRequest.Id)
+            if (!ModelState.IsValid || id != friendRequest.id)
             {
                 return BadRequest(ModelState);
             }

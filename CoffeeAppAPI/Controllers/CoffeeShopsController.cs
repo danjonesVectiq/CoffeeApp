@@ -11,9 +11,9 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CoffeeShopsController : ControllerBase
     {
-        private readonly CosmosDbService _cosmosDbService;
+        private readonly ICosmosDbService _cosmosDbService;
 
-        public CoffeeShopsController(CosmosDbService cosmosDbService)
+        public CoffeeShopsController(ICosmosDbService cosmosDbService)
         {
             _cosmosDbService = cosmosDbService;
         }

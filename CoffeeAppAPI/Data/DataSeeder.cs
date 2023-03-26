@@ -20,7 +20,7 @@ namespace CoffeeAppAPI.Data
         }
         public async Task SeedData()
         {
-            var users = GenerateUsers(10);
+           var users = GenerateUsers(10);
             await SeedUsers(users);
 
             var coffees = GenerateCoffees(10);
@@ -35,11 +35,11 @@ namespace CoffeeAppAPI.Data
             var badges = GenerateBadges(5);
             await SeedBadges(badges);
 
-            var userBadges = GenerateUserBadges(users, badges, 10);
+           var userBadges = GenerateUserBadges(users, badges, 10);
             await SeedUserBadges(userBadges);
 
-            var friendRequests = GenerateFriendRequests(users, 10);
-            await SeedFriendRequests(friendRequests);
+             var friendRequests = GenerateFriendRequests(users, 10);
+             await SeedFriendRequests(friendRequests);
         }
 
         private async Task SeedUsers(List<CoffeeAppAPI.Models.User> users)
@@ -126,10 +126,55 @@ namespace CoffeeAppAPI.Data
 
         private List<Badge> GenerateBadges(int count)
         {
+
+            var badgeList = new List<(string BadgeName, string BadgeDescription)>
+            {
+                
+                #region Badgenames
+                ("Espresso Explorer", "Check-in at 5 different coffee shops."),
+                ("Bean Connoisseur", "Try 10 different types of coffee beans."),
+                ("Latte Art Lover", "Share 5 photos of latte art on the app."),
+                ("Cold Brew Crew", "Log 10 cold brew coffee check-ins."),
+                ("Caffeine Crawl", "Visit 3 coffee shops in a single day."),
+                ("Home Barista", "Log 5 check-ins of home-brewed coffee."),
+                ("International Coffee Hopper", "Check-in at coffee shops in 3 different countries."),
+                ("Early Riser", "Check-in before 7:00 AM, 10 times."),
+                ("Night Owl", "Check-in after 9:00 PM, 10 times."),
+                ("Coffee and Conversation", "Check-in with a friend at a coffee shop 5 times."),
+                ("Study Buddy", "Check-in at a coffee shop while working or studying, 10 times."),
+                ("Seasonal Sipper", "Try 5 seasonal or limited-time coffee beverages."),
+                ("Decaf Dabbler", "Log 5 decaf coffee check-ins."),
+                ("Sweet Tooth", "Try 5 different flavored coffee beverages (e.g., mocha, caramel, vanilla)."),
+                ("Eco-Friendly Cup", "Check-in 10 times with a reusable cup."),
+                ("Local Coffee Lover", "Check-in at 5 independent, locally-owned coffee shops."),
+                ("Coffee Festival Fanatic", "Attend a coffee festival or event and check-in."),
+                ("Coffee Passport", "Try coffee from 5 different coffee-producing countries."),
+                ("Plant-Based Barista", "Log 10 check-ins with plant-based milk alternatives (e.g., almond, soy, oat)."),
+                ("Milestone Mocha", "Celebrate a personal or professional milestone with a coffee check-in."),
+                ("Drip Drop Champion", "Try 5 different drip coffee methods."),
+                ("Coffee Pairing Pro", "Check-in 5 times with a food pairing."),
+                ("Affogato Aficionado", "Try 3 different affogato creations."),
+                ("Aeropress Ace", "Log 5 check-ins with Aeropress-brewed coffee."),
+                ("French Press Fan", "Log 5 check-ins with French press-brewed coffee."),
+                ("Nitro Boost", "Try 3 different nitro cold brew coffee drinks."),
+                ("Sustainable Sipper", "Check-in 5 times at eco-friendly coffee shops."),
+                ("Roastery Rambler", "Visit 3 different coffee roasteries."),
+                ("Espresso Enthusiast", "Try 5 different espresso-based drinks."),
+                ("Chemex Chemist", "Log 5 check-ins with Chemex-brewed coffee.")
+                #endregion
+            };
+
             var badges = new Faker<Badge>()
-                .RuleFor(b => b.Id, f => f.Random.Guid())
-                .RuleFor(b => b.BadgeName, f => f.Commerce.ProductName())
-                .RuleFor(b => b.BadgeDescription, f => f.Lorem.Sentence())
+                .RuleFor(b => b.id, f => f.Random.Guid())
+                .CustomInstantiator(f =>
+                {
+                    var randomBadge = f.Random.ListItem(badgeList);
+                    return new Badge
+                    {
+                        BadgeName = randomBadge.BadgeName,
+                        BadgeDescription = randomBadge.BadgeDescription
+                    };
+                })
                 .RuleFor(b => b.BadgeIconUrl, f => f.Internet.Avatar())
                 .RuleFor(b => b.BadgeCriteria, f => f.Lorem.Sentence())
                 .Generate(count);
@@ -140,9 +185,9 @@ namespace CoffeeAppAPI.Data
         private List<UserBadge> GenerateUserBadges(List<CoffeeAppAPI.Models.User> users, List<Badge> badges, int count)
         {
             var userBadges = new Faker<UserBadge>()
-                .RuleFor(ub => ub.Id, f => f.Random.Guid())
+                .RuleFor(ub => ub.id, f => f.Random.Guid())
                 .RuleFor(ub => ub.UserId, f => f.PickRandom(users).id)
-                .RuleFor(ub => ub.BadgeId, f => f.PickRandom(badges).Id)
+                .RuleFor(ub => ub.BadgeId, f => f.PickRandom(badges).id)
                 .RuleFor(ub => ub.DateEarned, f => f.Date.Past())
                 .Generate(count);
 
@@ -152,7 +197,7 @@ namespace CoffeeAppAPI.Data
         private List<FriendRequest> GenerateFriendRequests(List<CoffeeAppAPI.Models.User> users, int count)
         {
             var friendRequests = new Faker<FriendRequest>()
-                .RuleFor(fr => fr.Id, f => f.Random.Guid())
+                .RuleFor(fr => fr.id, f => f.Random.Guid())
                 .RuleFor(fr => fr.RequesterId, f => f.PickRandom(users).id)
                 .RuleFor(fr => fr.RecipientId, f => f.PickRandom(users).id)
                 .RuleFor(fr => fr.RequestStatus, f => f.PickRandom(new[] { "Pending", "Accepted", "Declined" }))
@@ -219,7 +264,13 @@ namespace CoffeeAppAPI.Data
         public async Task CleanUpData()
         {
             // Remove all test data from the development database
+            await _cosmosDbService.DeleteAllItemsAsync<FriendRequest>(_container);
+            await _cosmosDbService.DeleteAllItemsAsync<CheckIn>(_container);
+            await _cosmosDbService.DeleteAllItemsAsync<CoffeeShop>(_container);
             await _cosmosDbService.DeleteAllItemsAsync<CoffeeAppAPI.Models.User>(_container);
+            await _cosmosDbService.DeleteAllItemsAsync<Coffee>(_container);
+            await _cosmosDbService.DeleteAllItemsAsync<Badge>(_container);
+
         }
     }
 }
