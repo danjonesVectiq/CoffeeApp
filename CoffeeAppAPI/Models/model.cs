@@ -32,7 +32,7 @@ namespace CoffeeAppAPI.Models
         public string CoffeeName { get; set; }
         public string CoffeeType { get; set; }
         public string Origin { get; set; }
-        public string Roaster { get; set; }
+
         public string RoastLevel { get; set; }
         public List<string> FlavorNotes { get; set; }
         public double AverageRating { get; set; }
@@ -40,7 +40,25 @@ namespace CoffeeAppAPI.Models
 
         public List<CheckInCoffee> CheckInCoffees { get; set; }
 
+        public Guid RoasterId { get; set; }
+        public Roaster Roaster { get; set; }
 
+    }
+
+    public class Roaster
+    {
+        public Guid id { get; set; }
+        public string RoasterName { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string WebsiteUrl { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Description { get; set; }
+        public List<Guid> RoastedCoffees { get; set; }
     }
 
     public class CoffeeShop
@@ -60,7 +78,7 @@ namespace CoffeeAppAPI.Models
     }
 
 
-//Visit to a CoffeeShop
+    //Visit to a CoffeeShop
     public class CheckIn
     {
         public Guid id { get; set; }
@@ -72,7 +90,7 @@ namespace CoffeeAppAPI.Models
         public List<CheckInCoffee> CheckInCoffees { get; set; }
     }
 
-//Coffess that were consumed during a CheckIn
+    //Coffess that were consumed during a CheckIn
     public class CheckInCoffee
     {
         public Guid id { get; set; }
@@ -108,40 +126,40 @@ namespace CoffeeAppAPI.Models
         public DateTime RequestDate { get; set; }
     }
 
-public class CoffeeShopReview
-{
-    public Guid id { get; set; }
-    public Guid UserId { get; set; }
-    public Guid CoffeeShopId { get; set; }
-    public int Rating { get; set; }
-    public double NormalizedRating { get; set; }
-    public string ReviewText { get; set; }
-    public DateTime ReviewDate { get; set; }
-    public int ReviewLikesCount { get; set; }
-}
+    public class CoffeeShopReview
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CoffeeShopId { get; set; }
+        public int Rating { get; set; }
+        public double NormalizedRating { get; set; }
+        public string ReviewText { get; set; }
+        public DateTime ReviewDate { get; set; }
+        public int ReviewLikesCount { get; set; }
+    }
 
-public class Review
-{
-    public Guid id { get; set; }
-    public Guid UserId { get; set; }
-    public Guid CoffeeId { get; set; }
-    // This is nullable because a review can be for a coffee, or for a coffee at a coffee shop
-    public Guid? CoffeeShopId { get; set; }
-    public int Rating { get; set; }
-    public double NormalizedRating { get; set; }
-    public string ReviewText { get; set; }
-    public DateTime ReviewDate { get; set; }
-    public int ReviewLikesCount { get; set; }
-}
+    public class Review
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CoffeeId { get; set; }
+        // This is nullable because a review can be for a coffee, or for a coffee at a coffee shop
+        public Guid? CoffeeShopId { get; set; }
+        public int Rating { get; set; }
+        public double NormalizedRating { get; set; }
+        public string ReviewText { get; set; }
+        public DateTime ReviewDate { get; set; }
+        public int ReviewLikesCount { get; set; }
+    }
     //Likes on a Review
-   public class ReviewLike
-{
-    public Guid id { get; set; }
-    public Guid UserId { get; set; }
-    public Guid? ReviewId { get; set; } // For coffee reviews - can be null if it's a coffee shop review
-    public Guid? CoffeeShopReviewId { get; set; } // For coffee shop reviews - can be null if it's a coffee review
-    public DateTime LikedDate { get; set; }
-}
+    public class ReviewLike
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid? ReviewId { get; set; } // For coffee reviews - can be null if it's a coffee shop review
+        public Guid? CoffeeShopReviewId { get; set; } // For coffee shop reviews - can be null if it's a coffee review
+        public DateTime LikedDate { get; set; }
+    }
 
     public class Comment
     {

@@ -20,7 +20,10 @@ namespace CoffeeAppAPI.Data
         }
         public async Task SeedData()
         {
-            var coffees = GenerateCoffees(10);
+            var roasters = GenerateRoasters(10);
+            await SeedCoffees(roasters);
+
+            var coffees = GenerateCoffees(roasters, 10);
             await SeedCoffees(coffees);
 
             var coffeeShops = GenerateCoffeeShops(10, coffees);
@@ -142,16 +145,35 @@ namespace CoffeeAppAPI.Data
                 .Generate(count);
         }
 
+        private List<Roaster> GenerateRoasters(int count)
+        {
+            var roasters = new Faker<Roaster>()
+                .RuleFor(r => r.Id, f => f.Random.Guid())
+                .RuleFor(r => r.RoasterName, f => f.Company.CompanyName())
+                .RuleFor(r => r.Address, f => f.Address.StreetAddress())
+                .RuleFor(r => r.City, f => f.Address.City())
+                .RuleFor(r => r.State, f => f.Address.State())
+                .RuleFor(r => r.Country, f => f.Address.Country())
+                .RuleFor(r => r.Latitude, f => f.Address.Latitude())
+                .RuleFor(r => r.Longitude, f => f.Address.Longitude())
+                .RuleFor(r => r.WebsiteUrl, f => f.Internet.Url())
+                .RuleFor(r => r.PhoneNumber, f => f.Phone.PhoneNumber())
+                .RuleFor(r => r.Description, f => f.Lorem.Paragraph())
+                .Generate(count);
+
+            return roasters;
+        }
 
 
-        private List<Coffee> GenerateCoffees(int count)
+
+        private List<Coffee> GenerateCoffees(List<Roaster> roasters, int count)
         {
             var coffees = new Faker<Coffee>()
                 .RuleFor(c => c.id, f => f.Random.Guid())
                 .RuleFor(c => c.CoffeeName, f => f.Commerce.ProductName())
                 .RuleFor(c => c.CoffeeType, f => f.PickRandom(new[] { "Espresso", "Cold Brew", "Pour Over", "Drip", "French Press" }))
                 .RuleFor(c => c.Origin, f => f.Address.Country())
-                .RuleFor(c => c.Roaster, f => f.Company.CompanyName())
+                .RuleFor(c => c.RoasterId, f => f.PickRandom(roasters).Id)
                 .RuleFor(c => c.RoastLevel, f => f.PickRandom(new[] { "Light", "Medium", "Dark" }))
                 .RuleFor(c => c.FlavorNotes, f => f.Random.ListItems(new[] { "Chocolate", "Caramel", "Fruity", "Floral", "Nutty" }, f.Random.Number(1, 3)))
                 .RuleFor(c => c.AverageRating, f => Math.Round(f.Random.Double(1, 5), 1))
@@ -160,6 +182,7 @@ namespace CoffeeAppAPI.Data
 
             return coffees;
         }
+
 
         private List<CoffeeShop> GenerateCoffeeShops(int count, List<Coffee> coffees)
         {
