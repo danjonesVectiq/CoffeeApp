@@ -126,6 +126,8 @@ namespace CoffeeAppAPI.Models
         public DateTime RequestDate { get; set; }
     }
 
+    
+
     public class CoffeeShopReview
     {
         public Guid id { get; set; }

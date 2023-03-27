@@ -13,10 +13,17 @@ namespace CoffeeAppAPI.Data
         private readonly ICosmosDbService _cosmosDbService;
         private readonly Container _container;
 
+        private readonly List<string> coffeeTypes = new List<string> { "Espresso", "Latte", "Cappuccino", "Americano", "Mocha" };
+        private readonly List<string> roastLevels = new List<string> { "Light", "Medium", "Medium-Dark", "Dark", "Extra Dark", };
+        private readonly List<string> flavorNotes = new List<string> { "Chocolate", "Fruity", "Floral", "Nutty", "Spicy", "Sweet" };
+        private readonly List<string> origins = new List<string> { "Colombia", "Ethiopia", "Brazil", "Guatemala", "Kenya" };
+        private readonly List<string> brewingMethods = new List<string> { "Pour Over", "French Press", "Aeropress", "Espresso Machine", "Cold Brew" };
+
         public DataSeeder(ICosmosDbService cosmosDbService)
         {
             _cosmosDbService = cosmosDbService;
             _container = cosmosDbService.GetOrCreateContainerAsync("Users", "/id").Result;
+
         }
         public async Task SeedData()
         {
@@ -48,6 +55,9 @@ namespace CoffeeAppAPI.Data
             var friendRequests = GenerateFriendRequests(users, 5);
             await SeedFriendRequests(friendRequests);
 
+            var coffeeShopReviews = GenerateCoffeeShopReviews(users, coffeeShops, 10);
+            await SeedCoffeeShopReviews(coffeeShopReviews);
+
             var reviews = GenerateReviews(users, coffees, coffeeShops, 10);
             await SeedReviews(reviews);
 
@@ -78,6 +88,7 @@ namespace CoffeeAppAPI.Data
 
         }
 
+
         private async Task SeedUsers(List<CoffeeAppAPI.Models.User> users)
         {
             var container = _cosmosDbService.GetOrCreateContainerAsync("Users", "/id").Result;
@@ -89,11 +100,7 @@ namespace CoffeeAppAPI.Data
 
         private List<CoffeeAppAPI.Models.User> GenerateUsers(List<Guid> coffeeShopIds, int count)
         {
-            var coffeeTypes = new List<string> { "Espresso", "Latte", "Cappuccino", "Americano", "Mocha" };
-            var roastLevels = new List<string> { "Light", "Medium", "Medium-Dark", "Dark", "Extra Dark", };
-            var flavorNotes = new List<string> { "Chocolate", "Fruity", "Floral", "Nutty", "Spicy", "Sweet" };
-            var origins = new List<string> { "Colombia", "Ethiopia", "Brazil", "Guatemala", "Kenya" };
-            var brewingMethods = new List<string> { "Pour Over", "French Press", "Aeropress", "Espresso Machine", "Cold Brew" };
+
 
 
             // Generate a list of fake users using Bogus
@@ -171,11 +178,11 @@ namespace CoffeeAppAPI.Data
             var coffees = new Faker<Coffee>()
                 .RuleFor(c => c.id, f => f.Random.Guid())
                 .RuleFor(c => c.CoffeeName, f => f.Commerce.ProductName())
-                .RuleFor(c => c.CoffeeType, f => f.PickRandom(new[] { "Espresso", "Cold Brew", "Pour Over", "Drip", "French Press" }))
+                .RuleFor(c => c.CoffeeType, f => f.PickRandom(this.coffeeTypes))
                 .RuleFor(c => c.Origin, f => f.Address.Country())
                 .RuleFor(c => c.RoasterId, f => f.PickRandom(roasters).id)
-                .RuleFor(c => c.RoastLevel, f => f.PickRandom(new[] { "Light", "Medium", "Dark" }))
-                .RuleFor(c => c.FlavorNotes, f => f.Random.ListItems(new[] { "Chocolate", "Caramel", "Fruity", "Floral", "Nutty" }, f.Random.Number(1, 3)))
+                .RuleFor(c => c.RoastLevel, f => f.PickRandom(this.roastLevels))
+                .RuleFor(c => c.FlavorNotes, f => f.Random.ListItems(this.flavorNotes, f.Random.Number(1, 3)))
                 .RuleFor(c => c.AverageRating, f => Math.Round(f.Random.Double(1, 5), 1))
                 .RuleFor(c => c.TotalRatings, f => f.Random.Number(1, 1000))
                 .Generate(count);
@@ -306,22 +313,37 @@ namespace CoffeeAppAPI.Data
         }
 
 
+        private List<CoffeeShopReview> GenerateCoffeeShopReviews(List<CoffeeAppAPI.Models.User> users, List<CoffeeShop> coffeeShops, int count)
+        {
+            var coffeeShopReviews = new Faker<CoffeeShopReview>()
+                .RuleFor(r => r.id, f => f.Random.Guid())
+                .RuleFor(r => r.UserId, f => f.PickRandom(users).id)
+                .RuleFor(r => r.CoffeeShopId, f => f.PickRandom(coffeeShops).id)
+                .RuleFor(r => r.Rating, f => f.Random.Number(1, 5))
+                .RuleFor(r => r.ReviewText, f => f.Lorem.Paragraph())
+                .RuleFor(r => r.ReviewDate, f => f.Date.Past(3))
+                .RuleFor(r => r.ReviewLikesCount, f => f.Random.Number(0, 100))
+                .Generate(count);
+
+            return coffeeShopReviews;
+        }
+
         private List<Review> GenerateReviews(List<CoffeeAppAPI.Models.User> users, List<Coffee> coffees, List<CoffeeShop> coffeeShops, int count)
         {
             var reviews = new Faker<Review>()
                 .RuleFor(r => r.id, f => f.Random.Guid())
                 .RuleFor(r => r.UserId, f => f.PickRandom(users).id)
                 .RuleFor(r => r.CoffeeId, f => f.PickRandom(coffees).id)
-                .RuleFor(r => r.CoffeeShopId, f => f.PickRandom(coffeeShops).id)
+                .RuleFor(r => r.CoffeeShopId, f => f.Random.Bool() ? f.PickRandom(coffeeShops).id : (Guid?)null)
                 .RuleFor(r => r.Rating, f => f.Random.Number(1, 5))
+                .RuleFor(r => r.NormalizedRating, f => Math.Round(f.Random.Double(1, 5), 1))
                 .RuleFor(r => r.ReviewText, f => f.Lorem.Paragraph())
-                .RuleFor(r => r.ReviewDate, f => f.Date.Past())
+                .RuleFor(r => r.ReviewDate, f => f.Date.Past(3))
                 .RuleFor(r => r.ReviewLikesCount, f => f.Random.Number(0, 100))
                 .Generate(count);
 
             return reviews;
         }
-
         private List<ReviewLike> GenerateReviewLikes(List<CoffeeAppAPI.Models.User> users, List<Review> reviews, int count)
         {
             var reviewLikes = new Faker<ReviewLike>()
@@ -473,6 +495,16 @@ namespace CoffeeAppAPI.Data
             foreach (var friendRequest in friendRequests)
             {
                 await _cosmosDbService.AddItemAsync(container, friendRequest);
+            }
+        }
+
+        
+        private async Task SeedCoffeeShopReviews(List<CoffeeShopReview> coffeeShopReviews)
+        {
+             var container = _cosmosDbService.GetOrCreateContainerAsync("CoffeeShopReviews", "/id").Result;
+            foreach (var coffeeShopReview in coffeeShopReviews)
+            {
+                await _cosmosDbService.AddItemAsync(container, coffeeShopReview);
             }
         }
 
