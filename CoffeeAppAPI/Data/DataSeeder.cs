@@ -21,7 +21,7 @@ namespace CoffeeAppAPI.Data
         public async Task SeedData()
         {
             var roasters = GenerateRoasters(10);
-            await SeedCoffees(roasters);
+            await SeedRoasters(roasters);
 
             var coffees = GenerateCoffees(roasters, 10);
             await SeedCoffees(coffees);
@@ -148,7 +148,7 @@ namespace CoffeeAppAPI.Data
         private List<Roaster> GenerateRoasters(int count)
         {
             var roasters = new Faker<Roaster>()
-                .RuleFor(r => r.Id, f => f.Random.Guid())
+                .RuleFor(r => r.id, f => f.Random.Guid())
                 .RuleFor(r => r.RoasterName, f => f.Company.CompanyName())
                 .RuleFor(r => r.Address, f => f.Address.StreetAddress())
                 .RuleFor(r => r.City, f => f.Address.City())
@@ -173,7 +173,7 @@ namespace CoffeeAppAPI.Data
                 .RuleFor(c => c.CoffeeName, f => f.Commerce.ProductName())
                 .RuleFor(c => c.CoffeeType, f => f.PickRandom(new[] { "Espresso", "Cold Brew", "Pour Over", "Drip", "French Press" }))
                 .RuleFor(c => c.Origin, f => f.Address.Country())
-                .RuleFor(c => c.RoasterId, f => f.PickRandom(roasters).Id)
+                .RuleFor(c => c.RoasterId, f => f.PickRandom(roasters).id)
                 .RuleFor(c => c.RoastLevel, f => f.PickRandom(new[] { "Light", "Medium", "Dark" }))
                 .RuleFor(c => c.FlavorNotes, f => f.Random.ListItems(new[] { "Chocolate", "Caramel", "Fruity", "Floral", "Nutty" }, f.Random.Number(1, 3)))
                 .RuleFor(c => c.AverageRating, f => Math.Round(f.Random.Double(1, 5), 1))
@@ -414,7 +414,14 @@ namespace CoffeeAppAPI.Data
             return notifications;
         }
 
-
+        private async Task SeedRoasters(List<Roaster> roasters)
+        {
+            var container = _cosmosDbService.GetOrCreateContainerAsync("Roasters", "/id").Result;
+            foreach (var roaster in roasters)
+            {
+                await _cosmosDbService.AddItemAsync(container, roaster);
+            }
+        }
         private async Task SeedCoffees(List<Coffee> coffees)
         {
             var container = _cosmosDbService.GetOrCreateContainerAsync("Coffees", "/id").Result;
