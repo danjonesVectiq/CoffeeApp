@@ -3,58 +3,67 @@ using Azure.Search.Documents;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
 using Azure.Search.Documents.Models;
-using CoffeeAppAPI.Models;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using CoffeeAppAPI.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Services
 {
+
     public class SearchService
     {
         private readonly SearchClient _searchClient;
         private readonly SearchIndexClient _searchIndexClient;
+        private readonly SearchIndexerClient _searchIndexerClient;
 
-        public SearchService(IOptions<AzureCognitiveSearchSettings> settings)
+
+        Uri serviceEndpoint;
+        AzureKeyCredential adminCredentials;
+        string connectionString = "";
+
+
+        public SearchService(IOptions<AzureCognitiveSearchSettings> settings, IConfiguration configuration)
         {
+
+            connectionString = configuration.GetSection("CosmosDb")["ConnectionString"];
             var serviceEndpoint = new Uri($"https://{settings.Value.SearchServiceName}.search.windows.net");
             var adminCredentials = new AzureKeyCredential(settings.Value.AdminApiKey);
-            _searchClient = new SearchClient(serviceEndpoint, "coffeesearchindex", adminCredentials);
+
             _searchIndexClient = new SearchIndexClient(serviceEndpoint, adminCredentials);
+            _searchIndexerClient = new SearchIndexerClient(serviceEndpoint, adminCredentials);
         }
-        public async Task CreateSearchIndexAsync()
+
+        public async Task CreateDataSourceAsync(string dataSourceName, string containerName)
         {
-            var index = new SearchIndex("coffeesearchindex")
+            var dataSource = new SearchIndexerDataSourceConnection(dataSourceName, SearchIndexerDataSourceType.CosmosDb, connectionString, new SearchIndexerDataContainer(containerName));
+            await _searchIndexerClient.CreateOrUpdateDataSourceConnectionAsync(dataSource);
+        }
+
+        public async Task CreateIndexForContainerAsync(string indexName, string[] fieldNames)
+        {
+            var index = new SearchIndex(indexName);
+
+            foreach (string fieldName in fieldNames)
             {
-                Fields =
-                {
-                    new SimpleField("id", SearchFieldDataType.String) { IsKey = true, IsFilterable = true, IsSortable = true, IsFacetable = false },
-                    new SearchableField("name") { IsFilterable = true, IsSortable = true, IsFacetable = false },
-                    new SearchableField("type") { IsFilterable = true, IsSortable = true, IsFacetable = false },
-                    // Add more fields as needed for coffee shops, roasters, and coffees
-                }
-            };
+                index.Fields.Add(new SearchableField(fieldName) { IsFilterable = true, IsSortable = true, IsFacetable = false });
+            }
 
             await _searchIndexClient.CreateOrUpdateIndexAsync(index);
         }
 
-        public async Task IndexDataAsync(IEnumerable<Coffee> coffees, IEnumerable<CoffeeShop> coffeeShops, IEnumerable<Roaster> roasters)
+        public async Task CreateIndexerForDataSourceAsync(string indexerName, string dataSourceName, string indexName)
         {
-            var documents = new List<SearchDocument>();
-
-            // Convert coffees, coffeeShops, and roasters to search documents
-            documents.AddRange(coffees.Select(ConvertCoffeeToSearchDocument));
-            documents.AddRange(coffeeShops.Select(ConvertCoffeeShopToSearchDocument));
-            documents.AddRange(roasters.Select(ConvertRoasterToSearchDocument));
-
-            var response = await _searchClient.UploadDocumentsAsync(documents);
+            var indexer = new SearchIndexer(indexerName, dataSourceName, indexName);
+            await _searchIndexerClient.CreateOrUpdateIndexerAsync(indexer);
         }
 
-        public async Task<SearchResults<SearchResult>> PerformSearchAsync(string searchText, string searchFilter = null, int? skip = null, int? take = null)
+
+        public async Task<SearchResults<SearchResult>> PerformSearchAsync(string searchText, string indexName, string searchFilter = null, int? skip = null, int? take = null, string[] fieldNames = null)
         {
+            var searchClient = new SearchClient(serviceEndpoint, indexName, adminCredentials);
+
             var options = new SearchOptions
             {
                 Filter = searchFilter,
@@ -62,42 +71,17 @@ namespace CoffeeAppAPI.Services
                 Size = take,
             };
 
-            options.Select.Add("id");
-            options.Select.Add("name");
-            options.Select.Add("type");
+            if (fieldNames != null)
+            {
+                foreach (string fieldName in fieldNames)
+                {
+                    options.Select.Add(fieldName);
+                }
+            }
 
-            Response<SearchResults<SearchResult>> response = await _searchClient.SearchAsync<SearchResult>(searchText, options);
+            Response<SearchResults<SearchResult>> response = await searchClient.SearchAsync<SearchResult>(searchText, options);
             return response.Value;
         }
 
-        private SearchDocument ConvertCoffeeToSearchDocument(Coffee coffee)
-        {
-            return new SearchDocument
-    {
-        {"id", $"coffee-{coffee.id}"},
-        {"name", coffee.CoffeeName},
-        {"type", "coffee"}
-    };
-        }
-
-        private SearchDocument ConvertCoffeeShopToSearchDocument(CoffeeShop coffeeShop)
-        {
-            return new SearchDocument
-    {
-        {"id", $"coffeeshop-{coffeeShop.id}"},
-        {"name", coffeeShop.CoffeeShopName},
-        {"type", "coffeeShop"}
-    };
-        }
-
-        private SearchDocument ConvertRoasterToSearchDocument(Roaster roaster)
-        {
-            return new SearchDocument
-    {
-        {"id", $"roaster-{roaster.id}"},
-        {"name", roaster.RoasterName},
-        {"type", "roaster"}
-    };
-        }
     }
 }
