@@ -11,48 +11,94 @@ using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Services
 {
-    using System.Threading.Tasks;
 
-    namespace CoffeeAppAPI.Services
+    public class IndexManagementService
     {
-        public class IndexManagementService
+        private readonly SearchClient _searchClient;
+        private readonly SearchIndexClient _searchIndexClient;
+        private readonly SearchIndexerClient _searchIndexerClient;
+
+        IConfigurationSection azureConfig;
+        Uri serviceEndpoint;
+        AzureKeyCredential adminCredentials;
+        string connectionString = "";
+
+        public IndexManagementService(IConfiguration configuration)
         {
-            private readonly SearchService _searchService;
+            azureConfig = configuration.GetSection("AzureCognitiveSearch");
+            var cosmosDbConfig = configuration.GetSection("CosmosDb");
+            connectionString = cosmosDbConfig["ConnectionString"] + "Database=CoffeeApp";
 
-            public IndexManagementService(SearchService searchService)
-            {
-                _searchService = searchService;
-            }
+            serviceEndpoint = new Uri($"https://{azureConfig["SearchServiceName"]}.search.windows.net");
 
-            public async Task InitializeAsync()
-            {
-                
-                await _searchService.CreateDataSourceAsync("coffeeds", "coffee");
-                await _searchService.CreateDataSourceAsync("coffeeshopds", "coffeeShop");
-                await _searchService.CreateDataSourceAsync("roasterds", "roaster");
+            adminCredentials = new AzureKeyCredential(azureConfig["AdminApiKey"]);
 
-                string[] coffeeFieldNames = new string[] { "id", "name", "cofeetype" }; // Customize field names as needed
-                string[] coffeeShopFieldNames = new string[] { "id", "name", "city" }; // Customize field names as needed
-                string[] roasterFieldNames = new string[] { "id", "name", "city" }; // Customize field names as needed
+            _searchIndexClient = new SearchIndexClient(serviceEndpoint, adminCredentials);
+            _searchIndexerClient = new SearchIndexerClient(serviceEndpoint, adminCredentials);
+        }
 
-                await _searchService.CreateIndexForContainerAsync("coffee-index", coffeeFieldNames);
-                await _searchService.CreateIndexForContainerAsync("coffeeshop-index", coffeeShopFieldNames);
-                await _searchService.CreateIndexForContainerAsync("roaster-index", roasterFieldNames);
+        public async Task InitializeAsync()
+        {
 
-                await _searchService.CreateIndexerForDataSourceAsync("coffee-indexer", "coffeeds", "coffee-index");
-                await _searchService.CreateIndexerForDataSourceAsync("coffeeshop-indexer", "coffeeshopds", "coffeeshop-index");
-                await _searchService.CreateIndexerForDataSourceAsync("roaster-indexer", "roasterds", "roaster-index");
+            await CreateDataSourceAsync("coffeeds", "Coffees");
+            await CreateDataSourceAsync("coffeeshopds", "CoffeeShops");
+            await CreateDataSourceAsync("roasterds", "Roasters");
 
-                await _searchService.RunIndexerAsync("coffee-indexer");
-                await _searchService.RunIndexerAsync("coffeeshop-indexer");
-                await _searchService.RunIndexerAsync("roaster-indexer");
+            string[] coffeeFieldNames = new string[] { "coffeename", "CoffeeType" }; // Customize field names as needed
+            string[] coffeeShopFieldNames = new string[] { "coffeeshopname", "City" }; // Customize field names as needed
+            string[] roasterFieldNames = new string[] { "roastername", "City" }; // Customize field names as needed
 
-            }
+            await CreateIndexForContainerAsync("coffee-index", coffeeFieldNames, "id");
+            await CreateIndexForContainerAsync("coffeeshop-index", coffeeShopFieldNames, "id");
+            await CreateIndexForContainerAsync("roaster-index", roasterFieldNames, "id");
 
-            public async Task<SearchIndexerStatus> GetIndexerStatusAsync(string indexerName)
-{
-            return (await _searchService.GetIndexerStatusAsync(indexerName));
-}
+            await CreateIndexerForDataSourceAsync("coffee-indexer", "coffeeds", "coffee-index");
+            await CreateIndexerForDataSourceAsync("coffeeshop-indexer", "coffeeshopds", "coffeeshop-index");
+            await CreateIndexerForDataSourceAsync("roaster-indexer", "roasterds", "roaster-index");
+
+            await RunIndexerAsync("coffee-indexer");
+            await RunIndexerAsync("coffeeshop-indexer");
+            await RunIndexerAsync("roaster-indexer");
+
+        }
+
+        public async Task<SearchIndexerStatus> GetIndexerStatusAsync(string indexerName)
+        {
+            return (await _searchIndexerClient.GetIndexerStatusAsync(indexerName)).Value;
+        }
+
+        public async Task CreateDataSourceAsync(string dataSourceName, string containerName)
+        {
+
+            Console.WriteLine($"dsn: {dataSourceName}");
+            Console.WriteLine($"cs: {connectionString}");
+            Console.WriteLine($"cn: {containerName}");
+
+            var dataSource = new SearchIndexerDataSourceConnection(dataSourceName, SearchIndexerDataSourceType.CosmosDb, connectionString, new SearchIndexerDataContainer(containerName));
+            await _searchIndexerClient.CreateOrUpdateDataSourceConnectionAsync(dataSource);
+        }
+        public async Task RunIndexerAsync(string indexerName)
+        {
+            await _searchIndexerClient.RunIndexerAsync(indexerName);
+        }
+
+
+
+        public async Task CreateIndexForContainerAsync(string indexName, string[] fieldNames, string keyFieldName)
+        {
+            var fields = fieldNames.Select(fieldName => new SearchField(fieldName, SearchFieldDataType.String)).ToList();
+
+            // Add the key field
+            fields.Add(new SearchField(keyFieldName, SearchFieldDataType.String) { IsKey = true });
+
+            var index = new SearchIndex(indexName, fields);
+            await _searchIndexClient.CreateOrUpdateIndexAsync(index);
+        }
+
+        public async Task CreateIndexerForDataSourceAsync(string indexerName, string dataSourceName, string indexName)
+        {
+            var indexer = new SearchIndexer(indexerName, dataSourceName, indexName);
+            await _searchIndexerClient.CreateOrUpdateIndexerAsync(indexer);
         }
     }
 }

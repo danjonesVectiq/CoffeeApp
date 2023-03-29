@@ -36,6 +36,8 @@ namespace CoffeeAppAPI.Data
             var coffeeShops = GenerateCoffeeShops(10, coffees);
             await SeedCoffeeShops(coffeeShops);
 
+            
+
             List<Guid> coffeeShopIds = coffeeShops.Select(c => c.id).ToList();
             var users = GenerateUsers(coffeeShopIds, 10);
             await SeedUsers(users);
@@ -585,6 +587,7 @@ namespace CoffeeAppAPI.Data
         {
             // Remove all test data from the development database
             await _cosmosDbService.DeleteAllItemsAsync<FriendRequest>(_container);
+            await _cosmosDbService.DeleteAllItemsAsync<Roaster>(_container);
             await _cosmosDbService.DeleteAllItemsAsync<CheckIn>(_container);
             await _cosmosDbService.DeleteAllItemsAsync<CoffeeShop>(_container);
             await _cosmosDbService.DeleteAllItemsAsync<CoffeeAppAPI.Models.User>(_container);

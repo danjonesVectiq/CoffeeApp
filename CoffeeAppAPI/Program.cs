@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Add this line to register CosmosDbService
-builder.Services.AddSingleton<CosmosDbService>();
+builder.Services.AddSingleton<SearchService>();
+builder.Services.AddSingleton<IndexManagementService>();
 builder.Services.AddSingleton<DataSeeder>();
 builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
 builder.Services.AddControllers();
