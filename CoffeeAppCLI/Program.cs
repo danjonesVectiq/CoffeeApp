@@ -33,10 +33,9 @@ namespace CoffeeAppCLI
             {
                 case "initialize":
                     string[] fieldNames = new string[] { "id", "name", "description" }; // Customize field names as needed
-                    await indexManagementService.InitializeAsync("coffeeds", "coffee-index", fieldNames);
+                    await indexManagementService.InitializeAsync();
                     Console.WriteLine("Initialization completed.");
                     break;
-
                 case "status":
                     if (args.Length < 2)
                     {

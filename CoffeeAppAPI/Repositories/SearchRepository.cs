@@ -26,7 +26,7 @@ public interface ISearchRepository
 
         public async Task IndexDataAsync(IEnumerable<Coffee> coffees, IEnumerable<CoffeeShop> coffeeShops, IEnumerable<Roaster> roasters)
         {
-            await _searchService.IndexDataAsync(coffees, coffeeShops, roasters);
+            await _searchService.IndexDataAsync();
         }
 
         public async Task<SearchResults<SearchResult>> PerformSearchAsync(string searchText, SearchOptions options)

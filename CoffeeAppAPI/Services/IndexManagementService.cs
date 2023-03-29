@@ -24,7 +24,7 @@ namespace CoffeeAppAPI.Services
                 _searchService = searchService;
             }
 
-            public async Task InitializeAsync(string[] fieldNames)
+            public async Task InitializeAsync()
             {
                 
                 await _searchService.CreateDataSourceAsync("coffeeds", "coffee");
