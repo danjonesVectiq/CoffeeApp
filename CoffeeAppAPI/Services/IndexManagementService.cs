@@ -24,21 +24,35 @@ namespace CoffeeAppAPI.Services
                 _searchService = searchService;
             }
 
-            public async Task InitializeAsync(string dataSourceName, string indexName, string[] fieldNames)
+            public async Task InitializeAsync(string[] fieldNames)
             {
+                
                 await _searchService.CreateDataSourceAsync("coffeeds", "coffee");
                 await _searchService.CreateDataSourceAsync("coffeeshopds", "coffeeShop");
                 await _searchService.CreateDataSourceAsync("roasterds", "roaster");
 
-                await _searchService.CreateIndexForContainerAsync("coffee-index", fieldNames);
-                await _searchService.CreateIndexForContainerAsync("coffeeshop-index", fieldNames);
-                await _searchService.CreateIndexForContainerAsync("roaster-index", fieldNames);
+                string[] coffeeFieldNames = new string[] { "id", "name", "cofeetype" }; // Customize field names as needed
+                string[] coffeeShopFieldNames = new string[] { "id", "name", "city" }; // Customize field names as needed
+                string[] roasterFieldNames = new string[] { "id", "name", "city" }; // Customize field names as needed
+
+                await _searchService.CreateIndexForContainerAsync("coffee-index", coffeeFieldNames);
+                await _searchService.CreateIndexForContainerAsync("coffeeshop-index", coffeeShopFieldNames);
+                await _searchService.CreateIndexForContainerAsync("roaster-index", roasterFieldNames);
 
                 await _searchService.CreateIndexerForDataSourceAsync("coffee-indexer", "coffeeds", "coffee-index");
                 await _searchService.CreateIndexerForDataSourceAsync("coffeeshop-indexer", "coffeeshopds", "coffeeshop-index");
                 await _searchService.CreateIndexerForDataSourceAsync("roaster-indexer", "roasterds", "roaster-index");
 
+                await _searchService.RunIndexerAsync("coffee-indexer");
+                await _searchService.RunIndexerAsync("coffeeshop-indexer");
+                await _searchService.RunIndexerAsync("roaster-indexer");
+
             }
+
+            public async Task<SearchIndexerStatus> GetIndexerStatusAsync(string indexerName)
+{
+            return (await _searchService.GetIndexerStatusAsync(indexerName));
+}
         }
     }
 }

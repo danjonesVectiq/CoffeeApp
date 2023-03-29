@@ -40,6 +40,15 @@ namespace CoffeeAppAPI.Services
             var dataSource = new SearchIndexerDataSourceConnection(dataSourceName, SearchIndexerDataSourceType.CosmosDb, connectionString, new SearchIndexerDataContainer(containerName));
             await _searchIndexerClient.CreateOrUpdateDataSourceConnectionAsync(dataSource);
         }
+        public async Task RunIndexerAsync(string indexerName)
+        {
+            await _searchIndexerClient.RunIndexerAsync(indexerName);
+        }
+
+        public async Task<SearchIndexerStatus> GetIndexerStatusAsync(string indexerName)
+        {
+            return (await _searchIndexerClient.GetIndexerStatusAsync(indexerName)).Value;
+        }
 
         public async Task CreateIndexForContainerAsync(string indexName, string[] fieldNames)
         {
