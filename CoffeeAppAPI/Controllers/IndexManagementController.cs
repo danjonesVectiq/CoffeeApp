@@ -16,7 +16,7 @@ namespace CoffeeAppAPI.Controllers
             _indexManagementService = indexManagementService;
         }
 
-        [HttpPost("initialize")]
+        [HttpGet("initialize")]
         public async Task<IActionResult> InitializeAsync()
         {
             await _indexManagementService.InitializeAsync();

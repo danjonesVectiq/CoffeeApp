@@ -2,6 +2,7 @@ using CoffeeAppAPI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using CoffeeAppAPI.Data;
+using CoffeeAppAPI.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Services.AddSingleton<SearchService>();
 builder.Services.AddSingleton<IndexManagementService>();
 builder.Services.AddSingleton<DataSeeder>();
 builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
+builder.Services.AddScoped<ISearchRepository, SearchRepository>(); 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

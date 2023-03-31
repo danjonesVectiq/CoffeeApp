@@ -34,7 +34,7 @@ namespace CoffeeAppAPI.Models
         public string Origin { get; set; }
 
         public string RoastLevel { get; set; }
-        public List<string> FlavorNotes { get; set; }
+        public string FlavorNotes { get; set; }
         public double AverageRating { get; set; }
         public int TotalRatings { get; set; }
 

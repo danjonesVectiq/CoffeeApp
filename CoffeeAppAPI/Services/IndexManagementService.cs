@@ -4,6 +4,7 @@ using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
 using Azure.Search.Documents.Models;
 using CoffeeAppAPI.Configuration;
+using CoffeeAppAPI.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Services;
 using System;
@@ -11,10 +12,9 @@ using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Services
 {
-
     public class IndexManagementService
     {
-        private readonly SearchClient _searchClient;
+       
         private readonly SearchIndexClient _searchIndexClient;
         private readonly SearchIndexerClient _searchIndexerClient;
 
@@ -44,9 +44,9 @@ namespace CoffeeAppAPI.Services
             await CreateDataSourceAsync("coffeeshopds", "CoffeeShops");
             await CreateDataSourceAsync("roasterds", "Roasters");
 
-            string[] coffeeFieldNames = new string[] { "coffeename", "CoffeeType" }; // Customize field names as needed
-            string[] coffeeShopFieldNames = new string[] { "coffeeshopname", "City" }; // Customize field names as needed
-            string[] roasterFieldNames = new string[] { "roastername", "City" }; // Customize field names as needed
+            string[] coffeeFieldNames = CoffeeSearchResult.GetFieldNames();
+            string[] coffeeShopFieldNames = CoffeeShopSearchResult.GetFieldNames(); // Customize field names as needed
+            string[] roasterFieldNames = RoasterSearchResult.GetFieldNames(); // Customize field names as needed
 
             await CreateIndexForContainerAsync("coffee-index", coffeeFieldNames, "id");
             await CreateIndexForContainerAsync("coffeeshop-index", coffeeShopFieldNames, "id");

@@ -1,21 +1,10 @@
-/* using Microsoft.AspNetCore.Mvc;
-using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
-using Azure.Search.Documents;
-using Azure.Search.Documents.Models;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Controllers
 {
-    //move this later
-    public class IndexDataRequest
-    {
-        public IEnumerable<Coffee> Coffees { get; set; }
-        public IEnumerable<CoffeeShop> CoffeeShops { get; set; }
-        public IEnumerable<Roaster> Roasters { get; set; }
-    }
-
     [ApiController]
     [Route("api/[controller]")]
     public class SearchController : ControllerBase
@@ -27,20 +16,32 @@ namespace CoffeeAppAPI.Controllers
             _searchRepository = searchRepository;
         }
 
-        // This is an example endpoint to trigger indexing data. You might want to handle this differently in your application.
-        [HttpPost("index")]
-        public async Task<IActionResult> IndexData([FromBody] IndexDataRequest request)
+        [HttpGet("coffees")]
+        public async Task<IActionResult> SearchCoffees(string query, int topResults = 10)
         {
-            await _searchRepository.IndexDataAsync(request.Coffees, request.CoffeeShops, request.Roasters);
-            return Ok();
+            var results = await _searchRepository.SearchCoffeesAsync(query, topResults);
+            return Ok(results);
         }
 
-        [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string searchText, [FromQuery] SearchOptions options)
+        [HttpGet("coffeeshops")]
+        public async Task<IActionResult> SearchCoffeeShops(string query, int topResults = 10)
         {
-            var results = await _searchRepository.PerformSearchAsync(searchText, options);
+            var results = await _searchRepository.SearchCoffeeShopsAsync(query, topResults);
+            return Ok(results);
+        }
+
+        [HttpGet("roasters")]
+        public async Task<IActionResult> SearchRoasters(string query, int topResults = 10)
+        {
+            var results = await _searchRepository.SearchRoastersAsync(query, topResults);
+            return Ok(results);
+        }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> SearchAll(string query, int topResults = 10)
+        {
+            var results = await _searchRepository.SearchAllAsync(query, topResults);
             return Ok(results);
         }
     }
 }
- */

@@ -15,7 +15,7 @@ namespace CoffeeAppAPI.Data
 
         private readonly List<string> coffeeTypes = new List<string> { "Espresso", "Latte", "Cappuccino", "Americano", "Mocha" };
         private readonly List<string> roastLevels = new List<string> { "Light", "Medium", "Medium-Dark", "Dark", "Extra Dark", };
-        private readonly List<string> flavorNotes = new List<string> { "Chocolate", "Fruity", "Floral", "Nutty", "Spicy", "Sweet" };
+        private readonly string[] flavorNotes = new string[] { "Chocolate", "Fruity", "Floral", "Nutty", "Spicy", "Sweet" };
         private readonly List<string> origins = new List<string> { "Colombia", "Ethiopia", "Brazil", "Guatemala", "Kenya" };
         private readonly List<string> brewingMethods = new List<string> { "Pour Over", "French Press", "Aeropress", "Espresso Machine", "Cold Brew" };
 
@@ -27,6 +27,9 @@ namespace CoffeeAppAPI.Data
         }
         public async Task SeedData()
         {
+
+
+
             var roasters = GenerateRoasters(10);
             await SeedRoasters(roasters);
 
@@ -184,7 +187,7 @@ namespace CoffeeAppAPI.Data
                 .RuleFor(c => c.Origin, f => f.Address.Country())
                 .RuleFor(c => c.RoasterId, f => f.PickRandom(roasters).id)
                 .RuleFor(c => c.RoastLevel, f => f.PickRandom(this.roastLevels))
-                .RuleFor(c => c.FlavorNotes, f => f.Random.ListItems(this.flavorNotes, f.Random.Number(1, 3)))
+               // .RuleFor(c => c.FlavorNotes, f => f.Random.Shuffle(this.flavorNotes).Take(f.Random.Int(1, 3)))
                 .RuleFor(c => c.AverageRating, f => Math.Round(f.Random.Double(1, 5), 1))
                 .RuleFor(c => c.TotalRatings, f => f.Random.Number(1, 1000))
                 .Generate(count);

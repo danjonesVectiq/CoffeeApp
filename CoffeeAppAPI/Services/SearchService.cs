@@ -1,74 +1,56 @@
 using Azure;
 using Azure.Search.Documents;
-using Azure.Search.Documents.Indexes;
-using Azure.Search.Documents.Indexes.Models;
 using Azure.Search.Documents.Models;
-using CoffeeAppAPI.Configuration;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Services;
+using Microsoft.Extensions.Configuration;
+
 using System;
 using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Services
 {
 
+    public enum SearchIndexInstance
+    {
+        Coffee,
+        CoffeeShop,
+        Roaster
+    }
+
     public class SearchService
     {
-        private readonly SearchClient _searchClient;
-        private readonly SearchIndexClient _searchIndexClient;
-        private readonly SearchIndexerClient _searchIndexerClient;
+        private readonly Uri _serviceEndpoint;
+        private readonly AzureKeyCredential _adminCredentials;
 
-        IConfigurationSection azureConfig;
-        Uri serviceEndpoint;
-        AzureKeyCredential adminCredentials;
-        string connectionString = "";
+        private static readonly IReadOnlyDictionary<SearchIndexInstance, string> IndexNames = new Dictionary<SearchIndexInstance, string>
+        {
+            { SearchIndexInstance.Coffee, "coffee-index" },
+            { SearchIndexInstance.CoffeeShop, "coffeeshop-index" },
+            { SearchIndexInstance.Roaster, "roaster-index" },
+        };
+
         public SearchService(IConfiguration configuration)
         {
-            //IOptions<AzureCognitiveSearchSettings> settings, maybe use this later in the constructor.
-
-            azureConfig = configuration.GetSection("AzureCognitiveSearch");
-            var cosmosDbConfig = configuration.GetSection("CosmosDb");
-            connectionString = cosmosDbConfig["ConnectionString"] + "Database=CoffeeApp";
-
-            Console.WriteLine($"AdminApiKey: {connectionString}");
-
-            Console.WriteLine($"SearchServiceName: {azureConfig["SearchServiceName"]}");
-            Console.WriteLine($"AdminApiKey: {azureConfig["AdminApiKey"]}");
-
-            serviceEndpoint = new Uri($"https://{azureConfig["SearchServiceName"]}.search.windows.net");
-
-
-            adminCredentials = new AzureKeyCredential(azureConfig["AdminApiKey"]);
-
-            _searchIndexClient = new SearchIndexClient(serviceEndpoint, adminCredentials);
-            _searchIndexerClient = new SearchIndexerClient(serviceEndpoint, adminCredentials);
+            var azureConfig = configuration.GetSection("AzureCognitiveSearch");
+            _serviceEndpoint = new Uri($"https://{azureConfig["SearchServiceName"]}.search.windows.net");
+            _adminCredentials = new AzureKeyCredential(azureConfig["AdminApiKey"]);
         }
-
        
-
-
-        public async Task<SearchResults<SearchResult>> PerformSearchAsync(string searchText, string indexName, string searchFilter = null, int? skip = null, int? take = null, string[] fieldNames = null)
+        public async Task<SearchResults<T>> SearchAsync<T>(SearchIndexInstance indexInstance, string searchText, int topResults = 10)
         {
-            var searchClient = new SearchClient(serviceEndpoint, indexName, adminCredentials);
-
-            var options = new SearchOptions
+            if (!IndexNames.TryGetValue(indexInstance, out string indexName))
             {
-                Filter = searchFilter,
-                Skip = skip,
-                Size = take,
+                throw new ArgumentException("Invalid index provided.");
+            }
+            Console.WriteLine($"Searching index {indexName} for {searchText}...");
+            var searchClient = new SearchClient(_serviceEndpoint, indexName, _adminCredentials);
+ Console.WriteLine($"SearchClient: {searchClient}");
+            var searchOptions = new SearchOptions
+            {
+                Size = topResults
             };
 
-            if (fieldNames != null)
-            {
-                foreach (string fieldName in fieldNames)
-                {
-                    options.Select.Add(fieldName);
-                }
-            }
-
-            Response<SearchResults<SearchResult>> response = await searchClient.SearchAsync<SearchResult>(searchText, options);
+            Response<SearchResults<T>> response = await searchClient.SearchAsync<T>(searchText, searchOptions);
             return response.Value;
         }
-
     }
 }
