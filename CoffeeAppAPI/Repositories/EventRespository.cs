@@ -1,4 +1,4 @@
-using CoffeeAppAPI.Models;
+/* using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
 using Microsoft.Azure.Cosmos;
 using System;
@@ -52,3 +52,4 @@ namespace CoffeeAppAPI.Repositories
         }
     }
 }
+ */

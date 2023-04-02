@@ -7,14 +7,25 @@ using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Repositories
 {
-    public class CoffeeRepository
+    // ICoffeeRepository.cs
+    public interface ICoffeeRepository : IRepository<Coffee>
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        // Add any Coffee-specific methods here, if needed
+    }
 
+    // CoffeeRepository.cs
+    public class CoffeeRepository : CosmosDbRepository<Coffee>, ICoffeeRepository
+    {
+
+        ICosmosDbService _cosmosDbService;
         public CoffeeRepository(ICosmosDbService cosmosDbService)
+            : base(cosmosDbService, "Coffees", "/id", "Coffee")
         {
             _cosmosDbService = cosmosDbService;
         }
+
+        // Implement any Coffee-specific methods here, if needed
+
 
         public async Task<Container> GetCoffeesContainerAsync()
         {

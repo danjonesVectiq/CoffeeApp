@@ -33,12 +33,12 @@ namespace CoffeeAppAPI.Repositories
 
         public async Task<SearchResults<CoffeeShopSearchResult>> SearchCoffeeShopsAsync(string query, int topResults)
         {
-            return await _searchService.SearchAsync<CoffeeShopSearchResult>(SearchIndexInstance.CoffeeShop, query, topResults);
+            return await _searchService.SearchAsync<CoffeeShopSearchResult>(SearchIndexInstance.Coffee, query, topResults);
         }
 
         public async Task<SearchResults<RoasterSearchResult>> SearchRoastersAsync(string query, int topResults)
         {
-            return await _searchService.SearchAsync<RoasterSearchResult>(SearchIndexInstance.Roaster, query, topResults);
+            return await _searchService.SearchAsync<RoasterSearchResult>(SearchIndexInstance.Interaction, query, topResults);
         }
 
         public async Task<IEnumerable<BaseSearchResult>> SearchAllAsync(string query, int topResults = 10)

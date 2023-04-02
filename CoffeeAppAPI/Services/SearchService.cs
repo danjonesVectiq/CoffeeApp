@@ -2,7 +2,7 @@ using Azure;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
 using Microsoft.Extensions.Configuration;
-
+using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -11,9 +11,9 @@ namespace CoffeeAppAPI.Services
 
     public enum SearchIndexInstance
     {
+        User,
         Coffee,
-        CoffeeShop,
-        Roaster
+        Interaction
     }
 
     public class SearchService
@@ -23,9 +23,9 @@ namespace CoffeeAppAPI.Services
 
         private static readonly IReadOnlyDictionary<SearchIndexInstance, string> IndexNames = new Dictionary<SearchIndexInstance, string>
         {
+            { SearchIndexInstance.User, "user-index" },
             { SearchIndexInstance.Coffee, "coffee-index" },
-            { SearchIndexInstance.CoffeeShop, "coffeeshop-index" },
-            { SearchIndexInstance.Roaster, "roaster-index" },
+            { SearchIndexInstance.Interaction, "interaction-index" },
         };
 
         public SearchService(IConfiguration configuration)
@@ -34,20 +34,28 @@ namespace CoffeeAppAPI.Services
             _serviceEndpoint = new Uri($"https://{azureConfig["SearchServiceName"]}.search.windows.net");
             _adminCredentials = new AzureKeyCredential(azureConfig["AdminApiKey"]);
         }
-       
+
         public async Task<SearchResults<T>> SearchAsync<T>(SearchIndexInstance indexInstance, string searchText, int topResults = 10)
         {
+
+
             if (!IndexNames.TryGetValue(indexInstance, out string indexName))
             {
                 throw new ArgumentException("Invalid index provided.");
             }
             Console.WriteLine($"Searching index {indexName} for {searchText}...");
             var searchClient = new SearchClient(_serviceEndpoint, indexName, _adminCredentials);
- Console.WriteLine($"SearchClient: {searchClient}");
+            Console.WriteLine($"SearchClient: {searchClient}");
             var searchOptions = new SearchOptions
             {
-                Size = topResults
+                Size = topResults,
+                SearchMode = SearchMode.Any,
+                IncludeTotalCount = true
             };
+
+            Console.WriteLine($"Search query: {searchText}");
+            Console.WriteLine($"Search options: {JsonConvert.SerializeObject(searchOptions)}");
+
 
             Response<SearchResults<T>> response = await searchClient.SearchAsync<T>(searchText, searchOptions);
             return response.Value;

@@ -63,7 +63,7 @@ namespace CoffeeAppAPITests.Controllers
                 TotalUniqueCoffees = 5,
                 TotalBadges = 3,
                 FavoriteCoffeeShops = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
-                Friends = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+                //Friends = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
             };
 
             _cosmosDbServiceMock.Setup(s => s.GetItemAsync<CoffeeAppAPIModels.User>(_mockContainer, userId.ToString())).ReturnsAsync(user);
@@ -112,7 +112,7 @@ namespace CoffeeAppAPITests.Controllers
                 TotalUniqueCoffees = 5,
                 TotalBadges = 3,
                 FavoriteCoffeeShops = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
-                Friends = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+                //Friends = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
             };
 
             _cosmosDbServiceMock.Setup(s => s.AddItemAsync(_mockContainer, user)).Returns(Task.CompletedTask);

@@ -17,10 +17,14 @@ namespace CoffeeAppAPI.Controllers
         }
 
         [HttpGet("coffees")]
-        public async Task<IActionResult> SearchCoffees(string query, int topResults = 10)
+        public async Task<IActionResult> SearchCoffees([FromQuery] string query, int topResults = 10)
         {
             var results = await _searchRepository.SearchCoffeesAsync(query, topResults);
-            return Ok(results);
+            return Ok(new
+            {
+                totalCount = results.TotalCount,
+                results = results.GetResults().Select(r => r.Document) // Add this line to include the search results in the response
+            });
         }
 
         [HttpGet("coffeeshops")]

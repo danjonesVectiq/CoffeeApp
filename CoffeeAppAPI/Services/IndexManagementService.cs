@@ -14,7 +14,7 @@ namespace CoffeeAppAPI.Services
 {
     public class IndexManagementService
     {
-       
+
         private readonly SearchIndexClient _searchIndexClient;
         private readonly SearchIndexerClient _searchIndexerClient;
 
@@ -37,28 +37,31 @@ namespace CoffeeAppAPI.Services
             _searchIndexerClient = new SearchIndexerClient(serviceEndpoint, adminCredentials);
         }
 
+
+
         public async Task InitializeAsync()
         {
 
-            await CreateDataSourceAsync("coffeeds", "Coffees");
-            await CreateDataSourceAsync("coffeeshopds", "CoffeeShops");
-            await CreateDataSourceAsync("roasterds", "Roasters");
+            //  await CreateDataSourceAsync("userds", "user");
+            await CreateDataSourceAsync("coffeeds", "Coffee");
+            //   await CreateDataSourceAsync("roasterds", "interaction");
 
-            string[] coffeeFieldNames = CoffeeSearchResult.GetFieldNames();
-            string[] coffeeShopFieldNames = CoffeeShopSearchResult.GetFieldNames(); // Customize field names as needed
-            string[] roasterFieldNames = RoasterSearchResult.GetFieldNames(); // Customize field names as needed
+            var coffeeContainerFieldNames = CoffeeSearchResult.GetFieldNames()
+            .Concat(CoffeeShopSearchResult.GetFieldNames())
+            .Concat(RoasterSearchResult.GetFieldNames())
+            .Distinct().ToArray();
 
-            await CreateIndexForContainerAsync("coffee-index", coffeeFieldNames, "id");
-            await CreateIndexForContainerAsync("coffeeshop-index", coffeeShopFieldNames, "id");
-            await CreateIndexForContainerAsync("roaster-index", roasterFieldNames, "id");
+            // await CreateIndexForContainerAsync("user-index", coffeeFieldNames, "id");
+            await CreateIndexForContainerAsync("coffee-index", coffeeContainerFieldNames, "id");
+            // await CreateIndexForContainerAsync("interaction-index", roasterFieldNames, "id");
 
+            //     await CreateIndexerForDataSourceAsync("user-indexer", "userds", "user-index");
             await CreateIndexerForDataSourceAsync("coffee-indexer", "coffeeds", "coffee-index");
-            await CreateIndexerForDataSourceAsync("coffeeshop-indexer", "coffeeshopds", "coffeeshop-index");
-            await CreateIndexerForDataSourceAsync("roaster-indexer", "roasterds", "roaster-index");
+            //    await CreateIndexerForDataSourceAsync("interaction-indexer", "interactionds", "interaction-index");
 
+            //    await RunIndexerAsync("user-indexer");
             await RunIndexerAsync("coffee-indexer");
-            await RunIndexerAsync("coffeeshop-indexer");
-            await RunIndexerAsync("roaster-indexer");
+            //   await RunIndexerAsync("interaction-indexer");
 
         }
 
@@ -69,10 +72,6 @@ namespace CoffeeAppAPI.Services
 
         public async Task CreateDataSourceAsync(string dataSourceName, string containerName)
         {
-
-            Console.WriteLine($"dsn: {dataSourceName}");
-            Console.WriteLine($"cs: {connectionString}");
-            Console.WriteLine($"cn: {containerName}");
 
             var dataSource = new SearchIndexerDataSourceConnection(dataSourceName, SearchIndexerDataSourceType.CosmosDb, connectionString, new SearchIndexerDataContainer(containerName));
             await _searchIndexerClient.CreateOrUpdateDataSourceConnectionAsync(dataSource);

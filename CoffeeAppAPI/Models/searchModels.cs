@@ -4,11 +4,35 @@ using System.Collections.Generic;
 
 namespace CoffeeAppAPI.Models
 {
-    public abstract class BaseSearchResult
-    {
-        public abstract string ContentType { get; }
-    }
 
+    public class BaseSearchResult
+    { }
+
+
+    public class UserSearchResult : BaseSearchResult
+    {
+        [SimpleField(IsKey = true, IsFilterable = true)]
+        public Guid id { get; set; }
+
+        [SimpleField(IsFilterable = true)]
+        public string Type { get; set; }
+
+        [SearchableField(IsSortable = true)]
+        public string Username { get; set; }
+
+        // Exclude Email and Password from the search index as they might contain sensitive information
+
+        public static string[] GetFieldNames()
+        {
+            return new[]
+            {
+            nameof(Type),
+            nameof(Username),
+
+            //nameof(FlavorNotes)
+        };
+        }
+    }
 
 
 
@@ -20,6 +44,9 @@ namespace CoffeeAppAPI.Models
         [SearchableField(IsSortable = true)]
         public string CoffeeName { get; set; }
 
+        [SimpleField(IsFilterable = true)]
+        public string Type { get; set; }
+
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string CoffeeType { get; set; }
 
@@ -29,18 +56,17 @@ namespace CoffeeAppAPI.Models
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string RoastLevel { get; set; }
 
-        [SearchableField(IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.EnLucene)]
-        public string[] FlavorNotes { get; set; }
+        /*  [SearchableField(IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.EnLucene)]
+         public string[] FlavorNotes { get; set; } */
 
-        [SimpleField(IsFilterable = true)]
-        public Guid RoasterId { get; set; }
-
-        public override string ContentType => "Roaster";
+        /*  [SimpleField(IsFilterable = true)]
+         public Roaster Roaster { get; set; } */
 
         public static string[] GetFieldNames()
         {
             return new[]
             {
+                nameof(Type),
             nameof(CoffeeName),
             nameof(CoffeeType),
             nameof(Origin),
@@ -54,6 +80,8 @@ namespace CoffeeAppAPI.Models
     {
         [SimpleField(IsKey = true, IsFilterable = true)]
         public Guid id { get; set; }
+        [SimpleField(IsFilterable = true)]
+        public string Type { get; set; }
 
         [SearchableField(IsSortable = true)]
         public string RoasterName { get; set; }
@@ -79,12 +107,12 @@ namespace CoffeeAppAPI.Models
         [SearchableField]
         public string Description { get; set; }
 
-        public override string ContentType => "Roaster";
 
         public static string[] GetFieldNames()
         {
             return new[]
             {
+                nameof(Type),
             nameof(RoasterName),
             nameof(Address),
             nameof(City),
@@ -102,6 +130,8 @@ namespace CoffeeAppAPI.Models
     {
         [SimpleField(IsKey = true, IsFilterable = true)]
         public Guid id { get; set; }
+        [SimpleField(IsFilterable = true)]
+        public string Type { get; set; }
 
         [SearchableField(IsSortable = true)]
         public string CoffeeShopName { get; set; }
@@ -124,12 +154,11 @@ namespace CoffeeAppAPI.Models
         [SimpleField(IsFilterable = true, IsSortable = true)]
         public double Longitude { get; set; }
 
-        public override string ContentType => "Roaster";
-
         public static string[] GetFieldNames()
         {
             return new[]
             {
+                nameof(Type),
             nameof(CoffeeShopName),
             nameof(Address),
             nameof(City),

@@ -9,46 +9,41 @@ namespace CoffeeAppAPI.Repositories
 {
     public class ReviewRepository
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly IReviewService _reviewService;
 
-        public ReviewRepository(ICosmosDbService cosmosDbService)
+        public ReviewRepository(IReviewService reviewService)
         {
-            _cosmosDbService = cosmosDbService;
-        }
-
-        public async Task<Container> GetReviewsContainerAsync()
-        {
-            return await _cosmosDbService.GetOrCreateContainerAsync("Reviews", "/id");
+            _reviewService = reviewService;
         }
 
         public async Task<IEnumerable<Review>> GetAllReviewsAsync()
         {
-            var reviewsContainer = await GetReviewsContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Review>(reviewsContainer);
+            return await _reviewService.GetAllItemsAsync<Review>(await _reviewService.GetOrCreateContainerAsync("Reviews", "/id"));
         }
 
         public async Task<Review> GetReviewAsync(Guid id)
         {
-            var reviewsContainer = await GetReviewsContainerAsync();
-            return await _cosmosDbService.GetItemAsync<Review>(reviewsContainer, id.ToString());
+            return await _reviewService.GetItemAsync<Review>(await _reviewService.GetOrCreateContainerAsync("Reviews", "/id"), id.ToString());
         }
 
         public async Task CreateReviewAsync(Review review)
         {
-            var reviewsContainer = await GetReviewsContainerAsync();
-            await _cosmosDbService.AddItemAsync(reviewsContainer, review);
+            await _reviewService.AddItemAsync(await _reviewService.GetOrCreateContainerAsync("Reviews", "/id"), review);
         }
 
         public async Task UpdateReviewAsync(Review review)
         {
-            var reviewsContainer = await GetReviewsContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(reviewsContainer, review.id.ToString(), review);
+            await _reviewService.UpdateItemAsync(await _reviewService.GetOrCreateContainerAsync("Reviews", "/id"), review.id.ToString(), review);
         }
 
         public async Task DeleteReviewAsync(Guid id)
         {
-            var reviewsContainer = await GetReviewsContainerAsync();
-            await _cosmosDbService.DeleteItemAsync<Review>(reviewsContainer, id.ToString());
+            await _reviewService.DeleteItemAsync<Review>(await _reviewService.GetOrCreateContainerAsync("Reviews", "/id"), id.ToString());
+        }
+
+        public async Task<IEnumerable<Review>> GetReviewsByUserIdAsync(Guid userId)
+        {
+            return await _reviewService.GetReviewsByUserIdAsync(userId);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Configuration;
 
 namespace CoffeeAppAPI.Services
@@ -11,11 +12,11 @@ namespace CoffeeAppAPI.Services
     public interface ICosmosDbService
     {
         Task<Container> GetOrCreateContainerAsync(string containerId, string partitionKeyPath);
-        Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container);
-        Task<T> GetItemAsync<T>(Container container, string id);
-        Task AddItemAsync<T>(Container container, T item);
-        Task UpdateItemAsync<T>(Container container, string id, T item);
-        Task DeleteItemAsync<T>(Container container, string id);
+        Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container) where T : class;
+        Task<T> GetItemAsync<T>(Container container, string id) where T : class;
+        Task AddItemAsync<T>(Container container, T item) where T : class;
+        Task UpdateItemAsync<T>(Container container, string id, T item) where T : class;
+        Task DeleteItemAsync<T>(Container container, string id) where T : class;
         Task DeleteAllItemsAsync<T>(Container container) where T : class;
     }
 
@@ -38,22 +39,21 @@ namespace CoffeeAppAPI.Services
             return containerResponse.Container;
         }
 
-        public async Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container)
+        public async Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container) where T : class
         {
-            var query = new QueryDefinition("SELECT * FROM c");
-            var iterator = container.GetItemQueryIterator<T>(query);
+            var query = container.GetItemLinqQueryable<T>().ToFeedIterator();
             var results = new List<T>();
 
-            while (iterator.HasMoreResults)
+            while (query.HasMoreResults)
             {
-                var response = await iterator.ReadNextAsync();
+                var response = await query.ReadNextAsync();
                 results.AddRange(response);
             }
 
             return results;
         }
 
-        public async Task<T> GetItemAsync<T>(Container container, string id)
+        public async Task<T> GetItemAsync<T>(Container container, string id) where T : class
         {
             try
             {
@@ -66,38 +66,31 @@ namespace CoffeeAppAPI.Services
             }
         }
 
-        public async Task AddItemAsync<T>(Container container, T item)
+        public async Task AddItemAsync<T>(Container container, T item) where T : class
         {
             await container.CreateItemAsync(item);
         }
 
-        public async Task UpdateItemAsync<T>(Container container, string id, T item)
+        public async Task UpdateItemAsync<T>(Container container, string id, T item) where T : class
         {
             await container.ReplaceItemAsync(item, id, new PartitionKey(id));
         }
 
-        public async Task DeleteItemAsync<T>(Container container, string id)
+        public async Task DeleteItemAsync<T>(Container container, string id) where T : class
         {
             await container.DeleteItemAsync<T>(id, new PartitionKey(id));
         }
 
         public async Task DeleteAllItemsAsync<T>(Container container) where T : class
         {
-            var query = container.GetItemQueryIterator<T>(new QueryDefinition("SELECT * FROM c"));
-            var itemsToDelete = new List<T>();
+            var query = container.GetItemLinqQueryable<T>(allowSynchronousQueryExecution: true).AsEnumerable();
 
-            while (query.HasMoreResults)
+            foreach (var item in query)
             {
-                var response = await query.ReadNextAsync();
-                itemsToDelete.AddRange(response);
-            }
-
-            foreach (var item in itemsToDelete)
-            {
-                await container.DeleteItemAsync<T>(item.GetType().GetProperty("id").GetValue(item).ToString(), new PartitionKey(item.GetType().GetProperty("id").GetValue(item).ToString()));
+                var id = item.GetType().GetProperty("id").GetValue(item).ToString();
+                await container.DeleteItemAsync<T>(id, new PartitionKey(id));
             }
         }
-
 
     }
 }
