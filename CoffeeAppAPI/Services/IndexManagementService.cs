@@ -42,9 +42,9 @@ namespace CoffeeAppAPI.Services
         public async Task InitializeAsync()
         {
 
-            //  await CreateDataSourceAsync("userds", "user");
-            await CreateDataSourceAsync("coffeeds", "Coffee");
-            //   await CreateDataSourceAsync("roasterds", "interaction");
+            //  await CreateDataSourceAsync("userds", "User");
+            await CreateDataSourceAsync("coffeeds", "Coffee", "tombstone");
+            //   await CreateDvataSourceAsync("interactionds", "Interaction");
 
             var coffeeContainerFieldNames = CoffeeSearchResult.GetFieldNames()
             .Concat(CoffeeShopSearchResult.GetFieldNames())
@@ -70,12 +70,19 @@ namespace CoffeeAppAPI.Services
             return (await _searchIndexerClient.GetIndexerStatusAsync(indexerName)).Value;
         }
 
-        public async Task CreateDataSourceAsync(string dataSourceName, string containerName)
+        public async Task CreateDataSourceAsync(string dataSourceName, string containerName, string softDeleteColumnName)
         {
-
             var dataSource = new SearchIndexerDataSourceConnection(dataSourceName, SearchIndexerDataSourceType.CosmosDb, connectionString, new SearchIndexerDataContainer(containerName));
+
+            if (!string.IsNullOrEmpty(softDeleteColumnName))
+            {
+                dataSource.DataChangeDetectionPolicy = new HighWaterMarkChangeDetectionPolicy("_ts");
+                dataSource.DataDeletionDetectionPolicy = new SoftDeleteColumnDeletionDetectionPolicy(softDeleteColumnName, "true");
+            }
+
             await _searchIndexerClient.CreateOrUpdateDataSourceConnectionAsync(dataSource);
         }
+
         public async Task RunIndexerAsync(string indexerName)
         {
             await _searchIndexerClient.RunIndexerAsync(indexerName);
