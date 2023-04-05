@@ -18,13 +18,13 @@ namespace CoffeeAppAPI.Repositories
 
         public async Task<Container> GetBadgesContainerAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("Badges", "/id");
+            return await _cosmosDbService.GetOrCreateContainerAsync("User", "/id");
         }
 
         public async Task<IEnumerable<Badge>> GetAllBadgesAsync()
         {
             var badgesContainer = await GetBadgesContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Badge>(badgesContainer);
+            return await _cosmosDbService.GetAllItemsAsync<Badge>(badgesContainer, "Badge");
         }
 
         public async Task<Badge> GetBadgeAsync(Guid id)

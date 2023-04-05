@@ -1,10 +1,14 @@
+using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
 using Microsoft.Azure.Cosmos;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Repositories
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<T> where T : class, IBaseModel
     {
         Task<IEnumerable<T>> GetAllAsync();
         Task<T> GetAsync(Guid id);
@@ -14,7 +18,7 @@ namespace CoffeeAppAPI.Repositories
     }
 
     // CosmosDbRepository.cs
-    public class CosmosDbRepository<T> : IRepository<T> where T : class
+    public class CosmosDbRepository<T> : IRepository<T> where T : class, IBaseModel
     {
         private readonly ICosmosDbService _cosmosDbService;
         private readonly Container _container;
@@ -30,11 +34,7 @@ namespace CoffeeAppAPI.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            var query = _container.GetItemLinqQueryable<T>(allowSynchronousQueryExecution: true)
-                .Where(item => item.GetType().GetProperty("Type").GetValue(item).ToString() == _entityType)
-                .AsEnumerable();
-
-            return query;
+            return await _cosmosDbService.GetAllItemsAsync<T>(_container, _entityType);
         }
 
         public async Task<T> GetAsync(Guid id)

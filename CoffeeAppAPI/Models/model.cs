@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CoffeeAppAPI.Models
 {
-    public class IBaseModel
+    public interface IBaseModel
     {
         Guid id { get; set; }
         string Type { get; }
