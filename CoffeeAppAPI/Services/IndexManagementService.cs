@@ -74,10 +74,15 @@ namespace CoffeeAppAPI.Services
         {
             var dataSource = new SearchIndexerDataSourceConnection(dataSourceName, SearchIndexerDataSourceType.CosmosDb, connectionString, new SearchIndexerDataContainer(containerName));
 
+
             if (!string.IsNullOrEmpty(softDeleteColumnName))
             {
                 dataSource.DataChangeDetectionPolicy = new HighWaterMarkChangeDetectionPolicy("_ts");
-                dataSource.DataDeletionDetectionPolicy = new SoftDeleteColumnDeletionDetectionPolicy(softDeleteColumnName, "true");
+                dataSource.DataDeletionDetectionPolicy = new SoftDeleteColumnDeletionDetectionPolicy()
+                {
+                    SoftDeleteColumnName = softDeleteColumnName,
+                    SoftDeleteMarkerValue = "true"
+                };
             }
 
             await _searchIndexerClient.CreateOrUpdateDataSourceConnectionAsync(dataSource);
