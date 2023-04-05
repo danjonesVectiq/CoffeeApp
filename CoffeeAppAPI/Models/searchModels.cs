@@ -6,16 +6,18 @@ namespace CoffeeAppAPI.Models
 {
 
     public class BaseSearchResult
-    { }
+    {
+        [SimpleField(IsKey = true, IsFilterable = true)]
+        public Guid id { get; set; }
+        [SimpleField(IsFilterable = true)]
+        public string Type { get; set; }
+        public Boolean IsDeleted { get; set; }
+
+    }
 
 
     public class UserSearchResult : BaseSearchResult
     {
-        [SimpleField(IsKey = true, IsFilterable = true)]
-        public Guid id { get; set; }
-
-        [SimpleField(IsFilterable = true)]
-        public string Type { get; set; }
 
         [SearchableField(IsSortable = true)]
         public string Username { get; set; }
@@ -38,14 +40,9 @@ namespace CoffeeAppAPI.Models
 
     public class CoffeeSearchResult : BaseSearchResult
     {
-        [SimpleField(IsKey = true, IsFilterable = true)]
-        public Guid id { get; set; }
 
         [SearchableField(IsSortable = true)]
         public string CoffeeName { get; set; }
-
-        [SimpleField(IsFilterable = true)]
-        public string Type { get; set; }
 
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string CoffeeType { get; set; }
@@ -66,7 +63,7 @@ namespace CoffeeAppAPI.Models
         {
             return new[]
             {
-                nameof(Type),
+            nameof(Type),
             nameof(CoffeeName),
             nameof(CoffeeType),
             nameof(Origin),
@@ -78,11 +75,7 @@ namespace CoffeeAppAPI.Models
     }
     public class RoasterSearchResult : BaseSearchResult
     {
-        [SimpleField(IsKey = true, IsFilterable = true)]
-        public Guid id { get; set; }
-        [SimpleField(IsFilterable = true)]
-        public string Type { get; set; }
-
+  
         [SearchableField(IsSortable = true)]
         public string RoasterName { get; set; }
 
@@ -99,10 +92,10 @@ namespace CoffeeAppAPI.Models
         public string Country { get; set; }
 
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double Latitude { get; set; }
+        public double? Latitude { get; set; }
 
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double Longitude { get; set; }
+        public double? Longitude { get; set; }
 
         [SearchableField]
         public string Description { get; set; }
@@ -112,7 +105,7 @@ namespace CoffeeAppAPI.Models
         {
             return new[]
             {
-                nameof(Type),
+            nameof(Type),
             nameof(RoasterName),
             nameof(Address),
             nameof(City),
@@ -128,10 +121,6 @@ namespace CoffeeAppAPI.Models
 
     public class CoffeeShopSearchResult : BaseSearchResult
     {
-        [SimpleField(IsKey = true, IsFilterable = true)]
-        public Guid id { get; set; }
-        [SimpleField(IsFilterable = true)]
-        public string Type { get; set; }
 
         [SearchableField(IsSortable = true)]
         public string CoffeeShopName { get; set; }
@@ -149,10 +138,10 @@ namespace CoffeeAppAPI.Models
         public string Country { get; set; }
 
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double Latitude { get; set; }
+        public double? Latitude { get; set; }
 
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double Longitude { get; set; }
+        public double? Longitude { get; set; }
 
         public static string[] GetFieldNames()
         {

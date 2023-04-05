@@ -28,17 +28,17 @@ namespace CoffeeAppAPI.Repositories
 
         public async Task<SearchResults<CoffeeSearchResult>> SearchCoffeesAsync(string query, int topResults)
         {
-            return await _searchService.SearchAsync<CoffeeSearchResult>(SearchIndexInstance.Coffee, query, topResults);
+            return await _searchService.SearchAsync<CoffeeSearchResult>(SearchIndexInstance.Coffee, query, topResults, "Type eq 'Coffee'");
         }
 
         public async Task<SearchResults<CoffeeShopSearchResult>> SearchCoffeeShopsAsync(string query, int topResults)
         {
-            return await _searchService.SearchAsync<CoffeeShopSearchResult>(SearchIndexInstance.Coffee, query, topResults);
+            return await _searchService.SearchAsync<CoffeeShopSearchResult>(SearchIndexInstance.Coffee, query, topResults, "Type eq 'CoffeeShop'");
         }
 
         public async Task<SearchResults<RoasterSearchResult>> SearchRoastersAsync(string query, int topResults)
         {
-            return await _searchService.SearchAsync<RoasterSearchResult>(SearchIndexInstance.Interaction, query, topResults);
+            return await _searchService.SearchAsync<RoasterSearchResult>(SearchIndexInstance.Coffee, query, topResults, "Type eq 'Roaster'");
         }
 
         public async Task<IEnumerable<BaseSearchResult>> SearchAllAsync(string query, int topResults = 10)

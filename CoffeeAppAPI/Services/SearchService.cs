@@ -35,7 +35,7 @@ namespace CoffeeAppAPI.Services
             _adminCredentials = new AzureKeyCredential(azureConfig["AdminApiKey"]);
         }
 
-        public async Task<SearchResults<T>> SearchAsync<T>(SearchIndexInstance indexInstance, string searchText, int topResults = 10)
+        public async Task<SearchResults<T>> SearchAsync<T>(SearchIndexInstance indexInstance, string searchText, int topResults = 10, string typeFilter = null)
         {
 
 
@@ -50,7 +50,8 @@ namespace CoffeeAppAPI.Services
             {
                 Size = topResults,
                 SearchMode = SearchMode.Any,
-                IncludeTotalCount = true
+                IncludeTotalCount = true,
+                Filter = typeFilter
             };
 
             Console.WriteLine($"Search query: {searchText}");

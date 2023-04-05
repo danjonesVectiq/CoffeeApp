@@ -39,7 +39,7 @@ namespace CoffeeAppAPI.Repositories
 
         public async Task<Container> GetUsersContainerAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
+            return await _cosmosDbService.GetOrCreateContainerAsync("User", "/id");
         }
 
         public async Task<IEnumerable<CoffeeAppAPI.Models.User>> GetAllUsersAsync()

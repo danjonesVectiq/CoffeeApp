@@ -19,7 +19,7 @@ namespace CoffeeAppAPI.Repositories
 
         ICosmosDbService _cosmosDbService;
         public CoffeeRepository(ICosmosDbService cosmosDbService)
-            : base(cosmosDbService, "Coffees", "/id", "Coffee")
+            : base(cosmosDbService, "Coffee", "/id", "Coffee")
         {
             _cosmosDbService = cosmosDbService;
         }

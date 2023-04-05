@@ -43,7 +43,7 @@ namespace CoffeeAppAPI.Services
         {
 
             //  await CreateDataSourceAsync("userds", "User");
-            await CreateDataSourceAsync("coffeeds", "Coffee", "tombstone");
+            await CreateDataSourceAsync("coffeeds", "Coffee", "isDeleted");
             //   await CreateDvataSourceAsync("interactionds", "Interaction");
 
             var coffeeContainerFieldNames = CoffeeSearchResult.GetFieldNames()
