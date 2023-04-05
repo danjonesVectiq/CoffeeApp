@@ -46,10 +46,7 @@ namespace CoffeeAppAPI.Services
             await CreateDataSourceAsync("coffeeds", "Coffee", "isDeleted");
             //   await CreateDvataSourceAsync("interactionds", "Interaction");
 
-            var coffeeContainerFieldNames = CoffeeSearchResult.GetFieldNames()
-            .Concat(CoffeeShopSearchResult.GetFieldNames())
-            .Concat(RoasterSearchResult.GetFieldNames())
-            .Distinct().ToArray();
+            var coffeeContainerFieldNames = CombineFields(new[]{ typeof(CoffeeSearchResult), typeof(CoffeeShopSearchResult), typeof(RoasterSearchResult)});
 
             // await CreateIndexForContainerAsync("user-index", coffeeFieldNames, "id");
             await CreateIndexForContainerAsync("coffee-index", coffeeContainerFieldNames, "id");
@@ -95,14 +92,14 @@ namespace CoffeeAppAPI.Services
 
 
 
-        public async Task CreateIndexForContainerAsync(string indexName, string[] fieldNames, string keyFieldName)
+        public async Task CreateIndexForContainerAsync(string indexName, List<SearchField> fieldNames, string keyFieldName)
         {
-            var fields = fieldNames.Select(fieldName => new SearchField(fieldName, SearchFieldDataType.String)).ToList();
+            //var fields = fieldNames.Select(fieldName => new SearchField(fieldName, SearchFieldDataType.String)).ToList();
 
             // Add the key field
-            fields.Add(new SearchField(keyFieldName, SearchFieldDataType.String) { IsKey = true });
+           // fields.Add(new SearchField(keyFieldName, SearchFieldDataType.String) { IsKey = true });
 
-            var index = new SearchIndex(indexName, fields);
+            var index = new SearchIndex(indexName, fieldNames);
             await _searchIndexClient.CreateOrUpdateIndexAsync(index);
         }
 
@@ -110,6 +107,25 @@ namespace CoffeeAppAPI.Services
         {
             var indexer = new SearchIndexer(indexerName, dataSourceName, indexName);
             await _searchIndexerClient.CreateOrUpdateIndexerAsync(indexer);
+        }
+
+        public List<SearchField> CombineFields(Type[] types)
+        {
+            var fieldBuilder = new FieldBuilder();
+            var combinedFields = new List<SearchField>();
+
+            foreach (var type in types)
+            {
+                var fields = fieldBuilder.Build(type);
+                combinedFields.AddRange(fields);
+            }
+
+            // Remove duplicate fields based on their names
+            var distinctFields = combinedFields.GroupBy(f => f.Name)
+                                               .Select(g => g.First())
+                                               .ToList();
+
+            return distinctFields;
         }
     }
 }
