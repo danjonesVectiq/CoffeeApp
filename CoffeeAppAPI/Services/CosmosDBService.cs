@@ -3,11 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Configuration;
 
-namespace CoffeeApp.Services
+namespace CoffeeAppAPI.Services
 {
-    public class CosmosDbService
+
+    public interface ICosmosDbService
+    {
+        Task<Container> GetOrCreateContainerAsync(string containerId, string partitionKeyPath);
+        Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container) where T : class;
+        Task<T> GetItemAsync<T>(Container container, string id) where T : class;
+        Task AddItemAsync<T>(Container container, T item) where T : class;
+        Task UpdateItemAsync<T>(Container container, string id, T item) where T : class;
+        Task DeleteItemAsync<T>(Container container, string id) where T : class;
+        Task DeleteAllItemsAsync<T>(Container container) where T : class;
+    }
+
+    public class CosmosDbService : ICosmosDbService
     {
         private readonly CosmosClient _cosmosClient;
 
@@ -26,22 +39,21 @@ namespace CoffeeApp.Services
             return containerResponse.Container;
         }
 
-        public async Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container)
+        public async Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container) where T : class
         {
-            var query = new QueryDefinition("SELECT * FROM c");
-            var iterator = container.GetItemQueryIterator<T>(query);
+            var query = container.GetItemLinqQueryable<T>().ToFeedIterator();
             var results = new List<T>();
 
-            while (iterator.HasMoreResults)
+            while (query.HasMoreResults)
             {
-                var response = await iterator.ReadNextAsync();
+                var response = await query.ReadNextAsync();
                 results.AddRange(response);
             }
 
             return results;
         }
 
-        public async Task<T> GetItemAsync<T>(Container container, string id)
+        public async Task<T> GetItemAsync<T>(Container container, string id) where T : class
         {
             try
             {
@@ -54,19 +66,30 @@ namespace CoffeeApp.Services
             }
         }
 
-        public async Task AddItemAsync<T>(Container container, T item)
+        public async Task AddItemAsync<T>(Container container, T item) where T : class
         {
             await container.CreateItemAsync(item);
         }
 
-        public async Task UpdateItemAsync<T>(Container container, string id, T item)
+        public async Task UpdateItemAsync<T>(Container container, string id, T item) where T : class
         {
             await container.ReplaceItemAsync(item, id, new PartitionKey(id));
         }
 
-        public async Task DeleteItemAsync<T>(Container container, string id)
+        public async Task DeleteItemAsync<T>(Container container, string id) where T : class
         {
             await container.DeleteItemAsync<T>(id, new PartitionKey(id));
+        }
+
+        public async Task DeleteAllItemsAsync<T>(Container container) where T : class
+        {
+            var query = container.GetItemLinqQueryable<T>(allowSynchronousQueryExecution: true).AsEnumerable();
+
+            foreach (var item in query)
+            {
+                var id = item.GetType().GetProperty("id").GetValue(item).ToString();
+                await container.DeleteItemAsync<T>(id, new PartitionKey(id));
+            }
         }
 
     }

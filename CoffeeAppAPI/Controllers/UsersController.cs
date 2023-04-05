@@ -2,35 +2,48 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using CoffeeApp.Models;
-using CoffeeApp.Services;
+using CoffeeAppAPI.Models;
+using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
-namespace CoffeeApp.Controllers
+namespace CoffeeAppAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly CosmosDbService _cosmosDbService;
+        private readonly UserRepository _userRepository;
 
-        public UsersController(CosmosDbService cosmosDbService)
+        public UsersController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _userRepository = new UserRepository(cosmosDbService);
         }
+
+        [HttpGet("{id}/preferences")]
+        public async Task<ActionResult<UserPreferences>> GetUserPreferences(Guid id)
+        {
+            var userPreferences = await _userRepository.LoadUserPreferences(id);
+
+            if (userPreferences == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(userPreferences);
+        }
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
         {
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
-            var users = await _cosmosDbService.GetAllItemsAsync<User>(usersContainer);
+            var users = await _userRepository.GetAllUsersAsync();
             return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(Guid id)
+        public async Task<ActionResult<User>> GetUser(string id)
         {
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
-            var user = await _cosmosDbService.GetItemAsync<User>(usersContainer, id.ToString());
+            var user = await _userRepository.GetUserAsync(id);
 
             if (user == null)
             {
@@ -49,8 +62,7 @@ namespace CoffeeApp.Controllers
             }
 
             user.id = Guid.NewGuid();
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/id");
-            await _cosmosDbService.AddItemAsync(usersContainer, user);
+            await _userRepository.CreateUserAsync(user);
             return CreatedAtAction(nameof(GetUser), new { id = user.id }, user);
         }
 
@@ -62,18 +74,15 @@ namespace CoffeeApp.Controllers
                 return BadRequest(ModelState);
             }
 
-            var usersContainer = await _cosmosDbService.GetOrCreateContainerAsync("Users", "/d");
-            var existingUser = await _cosmosDbService.GetItemAsync<User>(usersContainer, id.ToString());
+            var existingUser = await _userRepository.GetUserAsync(id.ToString());
 
             if (existingUser == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(usersContainer, id.ToString(), user);
+            await _userRepository.UpdateUserAsync(user);
             return NoContent();
         }
-
-        
     }
 }

@@ -2,35 +2,34 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using CoffeeApp.Models;
-using CoffeeApp.Services;
+using CoffeeAppAPI.Models;
+using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
-namespace CoffeeApp.Controllers
+namespace CoffeeAppAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class CheckInsController : ControllerBase
     {
-        private readonly CosmosDbService _cosmosDbService;
+        private readonly CheckInRepository _checkInRepository;
 
-        public CheckInsController(CosmosDbService cosmosDbService)
+        public CheckInsController(ICosmosDbService cosmosDbService)
         {
-            _cosmosDbService = cosmosDbService;
+            _checkInRepository = new CheckInRepository(cosmosDbService);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CheckIn>>> GetAllCheckIns()
         {
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            var checkIns = await _cosmosDbService.GetAllItemsAsync<CheckIn>(checkInsContainer);
+            var checkIns = await _checkInRepository.GetAllCheckInsAsync();
             return Ok(checkIns);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CheckIn>> GetCheckIn(Guid id)
         {
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            var checkIn = await _cosmosDbService.GetItemAsync<CheckIn>(checkInsContainer, id.ToString());
+            var checkIn = await _checkInRepository.GetCheckInAsync(id);
 
             if (checkIn == null)
             {
@@ -48,44 +47,41 @@ namespace CoffeeApp.Controllers
                 return BadRequest(ModelState);
             }
 
-            checkIn.Id = Guid.NewGuid();
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            await _cosmosDbService.AddItemAsync(checkInsContainer, checkIn);
-            return CreatedAtAction(nameof(GetCheckIn), new { id = checkIn.Id }, checkIn);
+            checkIn.id = Guid.NewGuid();
+            await _checkInRepository.CreateCheckInAsync(checkIn);
+            return CreatedAtAction(nameof(GetCheckIn), new { id = checkIn.id }, checkIn);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateCheckIn(Guid id, [FromBody] CheckIn checkIn)
         {
-            if (!ModelState.IsValid || id != checkIn.Id)
+            if (!ModelState.IsValid || id != checkIn.id)
             {
                 return BadRequest(ModelState);
             }
 
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            var existingCheckIn = await _cosmosDbService.GetItemAsync<CheckIn>(checkInsContainer, id.ToString());
+            var existingCheckIn = await _checkInRepository.GetCheckInAsync(id);
 
             if (existingCheckIn == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.UpdateItemAsync(checkInsContainer, id.ToString(), checkIn);
+            await _checkInRepository.UpdateCheckInAsync(checkIn);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCheckIn(Guid id)
         {
-            var checkInsContainer = await _cosmosDbService.GetOrCreateContainerAsync("CheckIns", "/checkinId");
-            var existingCheckIn = await _cosmosDbService.GetItemAsync<CheckIn>(checkInsContainer, id.ToString());
+            var existingCheckIn = await _checkInRepository.GetCheckInAsync(id);
 
             if (existingCheckIn == null)
             {
                 return NotFound();
             }
 
-            await _cosmosDbService.DeleteItemAsync<CheckIn>(checkInsContainer, id.ToString());
+            await _checkInRepository.DeleteCheckInAsync(id);
             return NoContent();
         }
     }
