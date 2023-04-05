@@ -31,14 +31,22 @@ namespace CoffeeAppAPI.Controllers
         public async Task<IActionResult> SearchCoffeeShops(string query, int topResults = 10)
         {
             var results = await _searchRepository.SearchCoffeeShopsAsync(query, topResults);
-            return Ok(results);
+            return Ok(new
+            {
+                totalCount = results.TotalCount,
+                results = results.GetResults().Select(r => r.Document) // Add this line to include the search results in the response
+            });
         }
 
         [HttpGet("roasters")]
         public async Task<IActionResult> SearchRoasters(string query, int topResults = 10)
         {
             var results = await _searchRepository.SearchRoastersAsync(query, topResults);
-            return Ok(results);
+             return Ok(new
+            {
+                totalCount = results.TotalCount,
+                results = results.GetResults().Select(r => r.Document) // Add this line to include the search results in the response
+            });
         }
 
         [HttpGet("all")]
