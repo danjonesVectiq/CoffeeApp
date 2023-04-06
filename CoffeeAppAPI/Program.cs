@@ -3,10 +3,22 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using CoffeeAppAPI.Data;
 using CoffeeAppAPI.Repositories;
+var  AllowAll = "_AllowAll";
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
 
+        options.AddPolicy(name: AllowAll,
+                          builder =>
+                          {
+                              builder.AllowAnyOrigin()
+                                     .AllowAnyMethod()
+                                     .AllowAnyHeader();
+                          });
+   
+});
 // Add this line to register CosmosDbService
 builder.Services.AddSingleton<SearchService>();
 builder.Services.AddSingleton<IndexManagementService>();
@@ -28,7 +40,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors(AllowAll);
 app.UseAuthorization();
 
 app.MapControllers();
