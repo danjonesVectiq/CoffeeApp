@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Azure.Core.GeoJson;
+using Microsoft.Azure.Cosmos.Spatial;
+using Microsoft.Spatial;
 
 namespace CoffeeAppAPI.Models
 {
@@ -47,14 +50,11 @@ namespace CoffeeAppAPI.Models
         public string CoffeeName { get; set; }
         public string CoffeeType { get; set; }
         public string Origin { get; set; }
-
         public string RoastLevel { get; set; }
         public string FlavorNotes { get; set; }
         public double AverageRating { get; set; }
         public int TotalRatings { get; set; }
-
         public Roaster Roaster { get; set; }
-
     }
 
     public class Roaster : BaseModel
@@ -87,6 +87,7 @@ namespace CoffeeAppAPI.Models
         public string PhoneNumber { get; set; }
         public string OperatingHours { get; set; }
         public List<Guid> AvailableCoffees { get; set; }
+         public Point Location { get; set; }
     }
 
 

@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using CoffeeAppAPI.Services;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Spatial;
+using Azure.Core.GeoJson;
+using Microsoft.Azure.Cosmos.Spatial;
 
 namespace CoffeeAppAPI.Data
 {
@@ -14,7 +17,6 @@ namespace CoffeeAppAPI.Data
         private readonly Container _coffeeContainer;
         private readonly Container _userContainer;
         private readonly Container _interactionContainer;
-
         private readonly List<string> coffeeTypes = new List<string> { "Espresso", "Latte", "Cappuccino", "Americano", "Mocha" };
         private readonly List<string> roastLevels = new List<string> { "Light", "Medium", "Medium-Dark", "Dark", "Extra Dark", };
         private readonly string[] flavorNotes = new string[] { "Chocolate", "Fruity", "Floral", "Nutty", "Spicy", "Sweet" };
@@ -27,7 +29,6 @@ namespace CoffeeAppAPI.Data
             _userContainer = cosmosDbService.GetOrCreateContainerAsync("User", "/id").Result;
             _coffeeContainer = cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id").Result;
             _interactionContainer = cosmosDbService.GetOrCreateContainerAsync("Interaction", "/id").Result;
-
         }
         public async Task SeedData()
         {
@@ -35,27 +36,19 @@ namespace CoffeeAppAPI.Data
             await SeedBadges(badges);
             var roasters = GenerateRoasters(10);
             await SeedRoasters(roasters);
-
             var coffees = GenerateCoffees(roasters, 10);
             await SeedCoffees(coffees);
-
             var coffeeShops = GenerateCoffeeShops(10, coffees);
             await SeedCoffeeShops(coffeeShops);
-
             List<Guid> coffeeShopIds = coffeeShops.Select(c => c.id).ToList();
             var users = GenerateUsers(coffeeShopIds, badges, 10);
             await SeedUsers(users);
-
             var checkins = GenerateCheckIns(users, coffees, coffeeShops, 10);
             await SeedCheckins(checkins);
-
-
             var reviews = GenerateReviews(users, coffees, coffeeShops, 10);
             await SeedReviews(reviews);
-
             var comments = GenerateComments(users, reviews, 10);
             await SeedComments(comments);
-
             var notifications = GenerateNotifications(users, 10);
             await SeedNotifications(notifications);
 
@@ -71,10 +64,8 @@ namespace CoffeeAppAPI.Data
             /* var userEvents = GenerateUserEvents(users, events, 10);
             await SeedUserEvents(userEvents); */
         }
-
         private List<CoffeeAppAPI.Models.User> GenerateUsers(List<Guid> coffeeShopIds, List<Badge> badges, int count)
         {
-
             // Generate a list of fake users using Bogus
             return new Faker<CoffeeAppAPI.Models.User>()
                 .RuleFor(u => u.id, f => f.Random.Guid())
@@ -124,7 +115,6 @@ namespace CoffeeAppAPI.Data
                 }))
                 .Generate(count);
         }
-
         private List<Roaster> GenerateRoasters(int count)
         {
             var roasters = new Faker<Roaster>()
@@ -140,12 +130,8 @@ namespace CoffeeAppAPI.Data
                 .RuleFor(r => r.PhoneNumber, f => f.Phone.PhoneNumber())
                 .RuleFor(r => r.Description, f => f.Lorem.Paragraph())
                 .Generate(count);
-
             return roasters;
         }
-
-
-
         private List<Coffee> GenerateCoffees(List<Roaster> roasters, int count)
         {
             var coffees = new Faker<Coffee>()
@@ -158,14 +144,13 @@ namespace CoffeeAppAPI.Data
                 // .RuleFor(c => c.FlavorNotes, f => f.Random.Shuffle(this.flavorNotes).Take(f.Random.Int(1, 3)))
                 .RuleFor(c => c.AverageRating, f => Math.Round(f.Random.Double(1, 5), 1))
                 .RuleFor(c => c.TotalRatings, f => f.Random.Number(1, 1000))
+               
                 .Generate(count);
-
             return coffees;
         }
-
-
         private List<CoffeeShop> GenerateCoffeeShops(int count, List<Coffee> coffees)
         {
+            GeoPoint geoPoint = new GeoPoint(47.6062, 122.3321);
             var coffeeShops = new Faker<CoffeeShop>()
                 .RuleFor(cs => cs.id, f => f.Random.Guid())
                 .RuleFor(cs => cs.CoffeeShopName, f => f.Company.CompanyName())
@@ -174,18 +159,15 @@ namespace CoffeeAppAPI.Data
                 .RuleFor(cs => cs.State, f => f.Address.State())
                 .RuleFor(cs => cs.Country, f => f.Address.Country())
                 .RuleFor(cs => cs.Latitude, f => f.Address.Latitude())
-                .RuleFor(cs => cs.Longitude, f => f.Address.Longitude())
+                 .RuleFor(c => c.Location, f => new Point(f.Address.Longitude(), f.Address.Latitude()))     
                 .RuleFor(cs => cs.WebsiteUrl, f => f.Internet.Url())
                 .RuleFor(cs => cs.PhoneNumber, f => f.Phone.PhoneNumber())
                 .RuleFor(cs => cs.OperatingHours, f => "8:00 AM - 8:00 PM")
                 .RuleFor(cs => cs.AvailableCoffees, f => f.Random.ListItems(coffees, f.Random.Number(1, coffees.Count)).Select(c => c.id).ToList())
                 .Generate(count);
-Console.WriteLine(coffeeShops[0].Type);
+            Console.WriteLine(coffeeShops[0].Type);
             return coffeeShops;
         }
-
-
-
         private List<CheckIn> GenerateCheckIns(List<CoffeeAppAPI.Models.User> users, List<Coffee> coffees, List<CoffeeShop> coffeeShops, int count)
         {
             var checkins = new Faker<CheckIn>()
@@ -196,16 +178,12 @@ Console.WriteLine(coffeeShops[0].Type);
                 .RuleFor(ch => ch.CheckinDate, f => f.Date.Past())
                 .RuleFor(ch => ch.CheckinPhotos, f => new List<string>()) // You can populate this with image URLs
                 .Generate(count);
-
             return checkins;
         }
-
         private List<Badge> GenerateBadges(int count)
         {
-
             var badgeList = new List<(string BadgeName, string BadgeDescription)>
-            {
-                
+            {                
                 #region Badgenames
                 ("Espresso Explorer", "Check-in at 5 different coffee shops."),
                 ("Bean Connoisseur", "Try 10 different types of coffee beans."),
@@ -239,7 +217,6 @@ Console.WriteLine(coffeeShops[0].Type);
                 ("Chemex Chemist", "Log 5 check-ins with Chemex-brewed coffee.")
                 #endregion
             };
-
             var badges = new Faker<Badge>()
                 .RuleFor(b => b.id, f => f.Random.Guid())
                 .CustomInstantiator(f =>
@@ -254,10 +231,8 @@ Console.WriteLine(coffeeShops[0].Type);
                 .RuleFor(b => b.BadgeIconUrl, f => f.Internet.Avatar())
                 .RuleFor(b => b.BadgeCriteria, f => f.Lorem.Sentence())
                 .Generate(count);
-
             return badges;
         }
-
         private List<Review> GenerateReviews(List<CoffeeAppAPI.Models.User> users, List<Coffee> coffees, List<CoffeeShop> coffeeShops, int count)
         {
             var reviews = new Faker<Review>()
@@ -270,7 +245,6 @@ Console.WriteLine(coffeeShops[0].Type);
                 .RuleFor(r => r.ReviewText, f => f.Lorem.Paragraph())
                 .RuleFor(r => r.ReviewDate, f => f.Date.Past(3))
                 .Generate(count);
-
             return reviews;
         }
         private List<ReviewLike> GenerateReviewLikes(List<CoffeeAppAPI.Models.User> users, List<Review> reviews, int count)
@@ -281,10 +255,8 @@ Console.WriteLine(coffeeShops[0].Type);
                 .RuleFor(rl => rl.ReviewId, f => f.PickRandom(reviews).id)
                 .RuleFor(rl => rl.LikedDate, f => f.Date.Recent())
                 .Generate(count);
-
             return reviewLikes;
         }
-
         private List<Comment> GenerateComments(List<CoffeeAppAPI.Models.User> users, List<Review> reviews, int count)
         {
             var comments = new Faker<Comment>()
@@ -294,10 +266,8 @@ Console.WriteLine(coffeeShops[0].Type);
                 .RuleFor(c => c.CommentText, f => f.Lorem.Sentence())
                 .RuleFor(c => c.CommentDate, f => f.Date.Recent())
                 .Generate(count);
-
             return comments;
         }
-
         private List<Notification> GenerateNotifications(List<CoffeeAppAPI.Models.User> users, int count)
         {
             var notifications = new Faker<Notification>()
@@ -311,7 +281,6 @@ Console.WriteLine(coffeeShops[0].Type);
 
             return notifications;
         }
-
         /*  private List<Event> GenerateEvents(List<CoffeeShop> coffeeShops, List<CoffeeAppAPI.Models.User> users, int count)
         {
            var events = new Faker<Event>()

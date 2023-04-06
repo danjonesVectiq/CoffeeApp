@@ -1,5 +1,7 @@
+using Azure.Core.GeoJson;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
+using Microsoft.Spatial;
 using System.Collections.Generic;
 
 namespace CoffeeAppAPI.Models
@@ -80,29 +82,24 @@ namespace CoffeeAppAPI.Models
 
     public class CoffeeShopSearchResult : BaseSearchResult
     {
-
         [SearchableField(IsSortable = true)]
         public string CoffeeShopName { get; set; }
 
         [SearchableField]
         public string Address { get; set; }
-
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string City { get; set; }
 
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string State { get; set; }
-
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string Country { get; set; }
-
         [SimpleField(IsFilterable = true, IsSortable = true)]
         public double? Latitude { get; set; }
-
         [SimpleField(IsFilterable = true, IsSortable = true)]
         public double? Longitude { get; set; }
-
-
+        [SearchableField(IsFilterable = true, IsSortable = true)]
+        public GeographyPoint? Location { get; set; }
     }
 
    public class CombinedSearchResult
