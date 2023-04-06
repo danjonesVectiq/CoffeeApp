@@ -3,14 +3,13 @@ import { inject, watch } from 'vue';
 import { ref } from 'vue'
 import { type SearchApi } from '../api/SearchApi'
 import _debounce from 'lodash.debounce';
-import { DebouncedFunc } from 'lodash';
-import { onMounted } from 'vue';
-
-const searchApi: SearchApi = inject("SearchAPI") as SearchApi;
+import { useSearchStore } from '../stores/searchStore';
 
 
-const loading = ref<boolean>(false);
+const searchStore = useSearchStore();
+// const loading = ref<boolean>(false);
 // defineProps<{ msg: string }>()
+const loading = searchStore.loading();
 const searchTerm = ref<string>("")
 // const count = ref(0)
 const onClick = () => {
@@ -21,11 +20,7 @@ let abortDebounceFlag = _debounce(searchAll, 300);
 
 
 function searchAll() {
-    if (searchTerm.value) {
-        console.log(searchTerm.value);
-        //     const resp = await searchApi.searchCoffees(searchTerm.value);
-        //     console.log(resp);
-    }
+    searchStore.setCurrentSearchTerm(searchTerm.value);
 }
 watch(searchTerm, abortDebounceFlag);
 

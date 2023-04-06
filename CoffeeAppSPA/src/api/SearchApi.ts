@@ -8,21 +8,25 @@ export class SearchApi {
 
   async searchCoffees(query: string, topResults: number = 10): Promise<AxiosResponse> {
     const url = `${this.baseUrl}/api/search/coffees?query=${query}&topResults=${topResults}`;
-    return await axios.get(url);
+    const resp = await axios.get(url);
+    return resp.data;
   }
 
   async searchCoffeeShops(query: string, topResults: number = 10): Promise<AxiosResponse> {
     const url = `${this.baseUrl}/api/search/coffeeshops?query=${query}&topResults=${topResults}`;
-    return await axios.get(url);
+    const resp = await axios.get(url);
+    return resp.data;
   }
 
   async searchRoasters(query: string, topResults: number = 10): Promise<AxiosResponse> {
     const url = `${this.baseUrl}/api/search/roasters?query=${query}&topResults=${topResults}`;
-    return await axios.get(url);
+    const resp = await axios.get(url);
+    return resp.data;
   }
 
   async searchAll(query: string, topResults: number = 10): Promise<AxiosResponse> {
     const url = `${this.baseUrl}/api/search/all?query=${query}&topResults=${topResults}`;
-    return await axios.get(url);
+    const resp = await axios.get(url);
+    return resp.data;
   }
 }
