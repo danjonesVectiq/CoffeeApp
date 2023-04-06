@@ -25,7 +25,7 @@ namespace CoffeeAppAPITests.Controllers
             _mockContainer = new Mock<Container>().Object; // Create a mocked Container object
 
             // Set up the mock method after initializing the mock object
-            _cosmosDbServiceMock.Setup(s => s.GetOrCreateContainerAsync("Users", "/id")).ReturnsAsync(_mockContainer);
+            _cosmosDbServiceMock.Setup(s => s.GetOrCreateContainerAsync("User", "/id")).ReturnsAsync(_mockContainer);
 
             _controller = new UsersController(_cosmosDbServiceMock.Object);
         }

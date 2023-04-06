@@ -3,10 +3,22 @@ using System.Collections.Generic;
 
 namespace CoffeeAppAPI.Models
 {
-    public class User
+    public interface IBaseModel
+    {
+        Guid id { get; set; }
+        string Type { get; }
+        bool isDeleted { get; set; }
+    }
+
+    public class BaseModel : IBaseModel
     {
         public Guid id { get; set; }
-        public string Type { get; private set; } = "User";
+        public virtual string Type { get; } = "Base";
+        public bool isDeleted { get; set; } = false;
+    }
+    public class User : BaseModel
+    {
+        public override string Type { get; } = "User";
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
@@ -29,10 +41,9 @@ namespace CoffeeAppAPI.Models
         public List<Badge> Badges { get; set; }
     }
 
-    public class Coffee
+    public class Coffee : BaseModel
     {
-        public Guid id { get; set; }
-        public string Type { get; private set; } = "Coffee";
+        public override string Type { get; } = "Coffee";
         public string CoffeeName { get; set; }
         public string CoffeeType { get; set; }
         public string Origin { get; set; }
@@ -46,34 +57,32 @@ namespace CoffeeAppAPI.Models
 
     }
 
-    public class Roaster
+    public class Roaster : BaseModel
     {
-        public Guid id { get; set; }
-        public string Type { get; private set; } = "Roaster";
+        public override string Type { get; } = "Roaster";
         public string RoasterName { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
         public string State { get; set; }
         public string Country { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
         public string WebsiteUrl { get; set; }
         public string PhoneNumber { get; set; }
         public string Description { get; set; }
         public List<Guid> RoastedCoffees { get; set; }
     }
 
-    public class CoffeeShop
+    public class CoffeeShop : BaseModel
     {
-        public Guid id { get; set; }
-        public string Type { get; private set; } = "CoffeeShop";
+        public override string Type { get; } = "CoffeeShop";
         public string CoffeeShopName { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
         public string State { get; set; }
         public string Country { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
         public string WebsiteUrl { get; set; }
         public string PhoneNumber { get; set; }
         public string OperatingHours { get; set; }
@@ -82,10 +91,9 @@ namespace CoffeeAppAPI.Models
 
 
     //Visit to a CoffeeShop
-    public class CheckIn
+    public class CheckIn : BaseModel
     {
-        public Guid id { get; set; }
-        public string Type { get; private set; } = "CheckIn";
+        public override string Type { get; } = "CheckIn";
         public User User { get; set; }
         public CoffeeShop CoffeeShop { get; set; }
         public DateTime CheckinDate { get; set; }
@@ -93,10 +101,9 @@ namespace CoffeeAppAPI.Models
         public List<Coffee> Coffees { get; set; }
     }
 
-    public class Badge
+    public class Badge : BaseModel
     {
-        public Guid id { get; set; }
-        public string Type { get; private set; } = "Badge";
+        public override string Type { get; } = "Badge";
         public string BadgeName { get; set; }
         public string BadgeDescription { get; set; }
         public string BadgeIconUrl { get; set; }
@@ -105,10 +112,9 @@ namespace CoffeeAppAPI.Models
 
 
 
-    public class Review
+    public class Review : BaseModel
     {
-        public Guid id { get; set; }
-        public string Type { get; private set; } = "Review";
+        public override string Type { get; } = "Review";
         public Guid UserId { get; set; }
         public Guid CoffeeId { get; set; }
         // This is nullable because a review can be for a coffee, or for a coffee at a coffee shop
@@ -121,37 +127,34 @@ namespace CoffeeAppAPI.Models
         public List<Comment> Comments { get; set; }
     }
     //Likes on a Review
-    public class ReviewLike
+    public class ReviewLike : BaseModel
     {
-        public Guid id { get; set; }
-        public string Type { get; private set; } = "ReviewLike";
+        public override string Type { get; } = "ReviewLike";
         public Guid UserId { get; set; }
         public Guid ReviewId { get; set; }
         public DateTime LikedDate { get; set; }
     }
 
-    public class Comment
+    public class Comment : BaseModel
     {
-        public Guid id { get; set; }
-        public string Type { get; private set; } = "Comment";
+        public override string Type { get; } = "Comment";
         public Guid UserId { get; set; }
         public Guid ReviewId { get; set; }
         public string CommentText { get; set; }
         public DateTime CommentDate { get; set; }
     }
-/* 
-    public class UserFollowing
-    {
-        public Guid id { get; set; }
-        public Guid FollowerId { get; set; }
-        public Guid FolloweeId { get; set; }
-        public DateTime FollowDate { get; set; }
-    } */
+    /* 
+        public class UserFollowing
+        {
+            public Guid id { get; set; }
+            public Guid FollowerId { get; set; }
+            public Guid FolloweeId { get; set; }
+            public DateTime FollowDate { get; set; }
+        } */
 
-    public class Notification
+    public class Notification : BaseModel
     {
-        public Guid id { get; set; }
-         public string Type { get; private set; } = "Notification";
+        public override string Type { get; } = "Notification";
         public Guid UserId { get; set; }
         public string NotificationType { get; set; }
         public string Content { get; set; }
@@ -159,10 +162,9 @@ namespace CoffeeAppAPI.Models
         public bool IsRead { get; set; }
     }
 
-    public class Recommendation
+    public class Recommendation : BaseModel
     {
-        public Guid id { get; set; }
-         public string Type { get; private set; } = "Recommendation";
+        public override string Type { get; } = "Recommendation";
         public Guid UserId { get; set; }
         public Guid CoffeeId { get; set; }
         public Guid RecommendedBy { get; set; }

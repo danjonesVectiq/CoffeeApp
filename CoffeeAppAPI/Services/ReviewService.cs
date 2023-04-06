@@ -21,7 +21,7 @@ namespace CoffeeAppAPI.Services
 
         public async Task<IEnumerable<Review>> GetReviewsByUserIdAsync(Guid userId)
         {
-            Container container = await GetOrCreateContainerAsync("Reviews", "/id");
+            Container container = await GetOrCreateContainerAsync("Interaction", "/id");
             var query = new QueryDefinition($"SELECT * FROM c WHERE c.UserId = '{userId}'");
             var iterator = container.GetItemQueryIterator<Review>(query);
             List<Review> results = new List<Review>();

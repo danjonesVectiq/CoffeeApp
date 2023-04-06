@@ -18,13 +18,13 @@ namespace CoffeeAppAPI.Repositories
 
         public async Task<Container> GetCoffeeShopsContainerAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("Coffees", "/id");
+            return await _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id");
         }
 
         public async Task<IEnumerable<Coffee>> GetAllCoffeesAsync()
         {
             var coffeeShopsContainer = await GetCoffeeShopsContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Coffee>(coffeeShopsContainer);
+            return await _cosmosDbService.GetAllItemsAsync<Coffee>(coffeeShopsContainer, "CoffeeShop");
         }
 
         public async Task<Coffee> GetCoffeeAsync(Guid id)

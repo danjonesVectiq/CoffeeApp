@@ -6,46 +6,31 @@ namespace CoffeeAppAPI.Models
 {
 
     public class BaseSearchResult
-    { }
+    {
+        [SimpleField(IsKey = true, IsFilterable = true)]
+        public string id { get; set; }
+        [SimpleField(IsFilterable = true)]
+        public string Type { get; set; }
+        public Boolean IsDeleted { get; set; }
+
+    }
 
 
     public class UserSearchResult : BaseSearchResult
     {
-        [SimpleField(IsKey = true, IsFilterable = true)]
-        public Guid id { get; set; }
-
-        [SimpleField(IsFilterable = true)]
-        public string Type { get; set; }
 
         [SearchableField(IsSortable = true)]
         public string Username { get; set; }
-
-        // Exclude Email and Password from the search index as they might contain sensitive information
-
-        public static string[] GetFieldNames()
-        {
-            return new[]
-            {
-            nameof(Type),
-            nameof(Username),
-
-            //nameof(FlavorNotes)
-        };
-        }
+        
     }
 
 
 
     public class CoffeeSearchResult : BaseSearchResult
     {
-        [SimpleField(IsKey = true, IsFilterable = true)]
-        public Guid id { get; set; }
 
         [SearchableField(IsSortable = true)]
         public string CoffeeName { get; set; }
-
-        [SimpleField(IsFilterable = true)]
-        public string Type { get; set; }
 
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string CoffeeType { get; set; }
@@ -62,27 +47,11 @@ namespace CoffeeAppAPI.Models
         /*  [SimpleField(IsFilterable = true)]
          public Roaster Roaster { get; set; } */
 
-        public static string[] GetFieldNames()
-        {
-            return new[]
-            {
-                nameof(Type),
-            nameof(CoffeeName),
-            nameof(CoffeeType),
-            nameof(Origin),
-            nameof(RoastLevel)//,
-            //nameof(FlavorNotes)
-        };
 
-        }
     }
     public class RoasterSearchResult : BaseSearchResult
     {
-        [SimpleField(IsKey = true, IsFilterable = true)]
-        public Guid id { get; set; }
-        [SimpleField(IsFilterable = true)]
-        public string Type { get; set; }
-
+  
         [SearchableField(IsSortable = true)]
         public string RoasterName { get; set; }
 
@@ -99,39 +68,18 @@ namespace CoffeeAppAPI.Models
         public string Country { get; set; }
 
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double Latitude { get; set; }
+        public double? Latitude { get; set; }
 
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double Longitude { get; set; }
+        public double? Longitude { get; set; }
 
         [SearchableField]
         public string Description { get; set; }
 
-
-        public static string[] GetFieldNames()
-        {
-            return new[]
-            {
-                nameof(Type),
-            nameof(RoasterName),
-            nameof(Address),
-            nameof(City),
-            nameof(State),
-            nameof(Country),
-            nameof(Latitude),
-            nameof(Longitude),
-            nameof(Description)
-        };
-
-        }
     }
 
     public class CoffeeShopSearchResult : BaseSearchResult
     {
-        [SimpleField(IsKey = true, IsFilterable = true)]
-        public Guid id { get; set; }
-        [SimpleField(IsFilterable = true)]
-        public string Type { get; set; }
 
         [SearchableField(IsSortable = true)]
         public string CoffeeShopName { get; set; }
@@ -149,25 +97,18 @@ namespace CoffeeAppAPI.Models
         public string Country { get; set; }
 
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double Latitude { get; set; }
+        public double? Latitude { get; set; }
 
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double Longitude { get; set; }
+        public double? Longitude { get; set; }
 
-        public static string[] GetFieldNames()
-        {
-            return new[]
-            {
-                nameof(Type),
-            nameof(CoffeeShopName),
-            nameof(Address),
-            nameof(City),
-            nameof(State),
-            nameof(Country),
-            nameof(Latitude),
-            nameof(Longitude)
-        };
-        }
 
     }
+
+   public class CombinedSearchResult
+{
+    public IEnumerable<CoffeeSearchResult> Coffees { get; set; }
+    public IEnumerable<CoffeeShopSearchResult> CoffeeShops { get; set; }
+    public IEnumerable<RoasterSearchResult> Roasters { get; set; }
+}
 }

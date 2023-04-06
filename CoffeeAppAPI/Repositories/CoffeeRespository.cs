@@ -19,7 +19,7 @@ namespace CoffeeAppAPI.Repositories
 
         ICosmosDbService _cosmosDbService;
         public CoffeeRepository(ICosmosDbService cosmosDbService)
-            : base(cosmosDbService, "Coffees", "/id", "Coffee")
+            : base(cosmosDbService, "Coffee", "/id", "Coffee")
         {
             _cosmosDbService = cosmosDbService;
         }
@@ -29,13 +29,13 @@ namespace CoffeeAppAPI.Repositories
 
         public async Task<Container> GetCoffeesContainerAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("Coffees", "/id");
+            return await _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id");
         }
 
         public async Task<IEnumerable<Coffee>> GetAllCoffeesAsync()
         {
             var coffeesContainer = await GetCoffeesContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Coffee>(coffeesContainer);
+            return await _cosmosDbService.GetAllItemsAsync<Coffee>(coffeesContainer, "Coffee");
         }
 
         public async Task<Coffee> GetCoffeeAsync(Guid id)
