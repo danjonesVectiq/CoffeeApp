@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { provide } from 'vue';
 import Search from './components/Search.vue';
+import SearchResults from './components/SearchResults.vue';
 </script>
 
 <template>
   <Search/>
+  <SearchResults/>
 </template>
 
 <style scoped>

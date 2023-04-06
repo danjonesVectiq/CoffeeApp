@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { inject, watch } from 'vue';
+import { watch } from 'vue';
 import { ref } from 'vue'
-import { type SearchApi } from '../api/SearchApi'
 import _debounce from 'lodash.debounce';
 import { useSearchStore } from '../stores/searchStore';
 

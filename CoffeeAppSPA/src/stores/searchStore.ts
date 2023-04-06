@@ -9,14 +9,19 @@ export const useSearchStore = defineStore('searches', () => {
     
     const _loading = ref(false);
     const _currentSearchTerm = ref('');
-    const _currentSearchResults = ref<any>();
+    const _allSearchResults = ref<any[]>([]);
 
     
     async function searchAll() {
         const searchTerm = _currentSearchTerm.value;
         if (searchTerm) {
             _loading.value = true;
-            _currentSearchResults.value = await searchApi.searchAll(searchTerm);
+            const allResult = await searchApi.searchAll(searchTerm);
+            _allSearchResults.value.splice(0);
+            Object.values(allResult).forEach((results)=>{
+                console.log(results);
+                _allSearchResults.value.push(...results);
+            })
             _loading.value = false;
         }
     }
@@ -24,8 +29,8 @@ export const useSearchStore = defineStore('searches', () => {
     const loading = (): Ref<boolean> =>{
         return _loading;
     }
-    const currentSearchResults = (): Ref<any> =>{
-        return _currentSearchResults;
+    const allSearchResults = (): Ref<any[]> =>{
+        return _allSearchResults;
     }
     const currentSearchTerm = (): Ref<string> =>{
         return _currentSearchTerm;
@@ -38,7 +43,7 @@ export const useSearchStore = defineStore('searches', () => {
     }
     return {
         loading,
-        currentSearchResults,
+        allSearchResults,
         currentSearchTerm,
         setCurrentSearchTerm
     }
