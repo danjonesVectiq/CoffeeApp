@@ -45,6 +45,9 @@ namespace CoffeeAppAPI.Models
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string RoastLevel { get; set; }
 
+        [SimpleField]
+        public string ImageUrl { get; set; }
+
         /*  [SearchableField(IsFilterable = true, AnalyzerName = LexicalAnalyzerName.Values.EnLucene)]
          public string[] FlavorNotes { get; set; } */
 

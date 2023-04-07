@@ -37,7 +37,7 @@ namespace CoffeeAppAPITests.Controllers
 
 
             // Act
-            var result = await _controller.GetUser(Guid.NewGuid().ToString());
+            var result = await _controller.GetUser(Guid.NewGuid());
 
             // Assert
             Assert.IsType<NotFoundResult>(result.Result);
@@ -57,7 +57,7 @@ namespace CoffeeAppAPITests.Controllers
                 FirstName = "John",
                 LastName = "Doe",
                 Bio = "Coffee enthusiast and software developer.",
-                ProfilePictureUrl = "https://example.com/profile_pictures/johndoe.jpg",
+                ImageUrl = "https://example.com/profile_pictures/johndoe.jpg",
                 JoinDate = DateTime.UtcNow,
                 TotalCheckins = 10,
                 TotalUniqueCoffees = 5,
@@ -69,7 +69,7 @@ namespace CoffeeAppAPITests.Controllers
             _cosmosDbServiceMock.Setup(s => s.GetItemAsync<CoffeeAppAPIModels.User>(_mockContainer, userId.ToString())).ReturnsAsync(user);
 
             // Act
-            var result = await _controller.GetUser(userId.ToString());
+            var result = await _controller.GetUser(userId);
 
             // Debug: Print the result
             Console.WriteLine($"Result: {result.Result}");
@@ -106,7 +106,7 @@ namespace CoffeeAppAPITests.Controllers
                 FirstName = "John",
                 LastName = "Doe",
                 Bio = "Coffee enthusiast and software developer.",
-                ProfilePictureUrl = "https://example.com/profile_pictures/johndoe.jpg",
+                ImageUrl = "https://example.com/profile_pictures/johndoe.jpg",
                 JoinDate = DateTime.UtcNow,
                 TotalCheckins = 10,
                 TotalUniqueCoffees = 5,

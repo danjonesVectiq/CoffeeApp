@@ -1,24 +1,26 @@
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
-using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Repositories
 {
-    public class UserRepository
+    public interface IUserRepository : IRepository<User>
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        Task<UserPreferences> LoadUserPreferences(Guid userId);
+    }
 
+    public class UserRepository : CosmosDbRepository<User>, IUserRepository
+    {
         public UserRepository(ICosmosDbService cosmosDbService)
+            : base(cosmosDbService, "User", "/id", "User")
         {
-            _cosmosDbService = cosmosDbService;
         }
+
         public async Task<UserPreferences> LoadUserPreferences(Guid userId)
         {
-            var usersContainer = await GetUsersContainerAsync();
-            var user = await _cosmosDbService.GetItemAsync<CoffeeAppAPI.Models.User>(usersContainer, userId.ToString());
+            var user = await GetAsync(userId);
 
             if (user != null)
             {
@@ -37,33 +39,24 @@ namespace CoffeeAppAPI.Repositories
             return null;
         }
 
-        public async Task<Container> GetUsersContainerAsync()
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("User", "/id");
+            return await GetAllAsync();
         }
 
-        public async Task<IEnumerable<CoffeeAppAPI.Models.User>> GetAllUsersAsync()
+        public async Task<User> GetUserAsync(Guid id)
         {
-            var usersContainer = await GetUsersContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<CoffeeAppAPI.Models.User>(usersContainer, "User");
+            return await GetAsync(id);
         }
 
-        public async Task<CoffeeAppAPI.Models.User> GetUserAsync(Guid id)
+        public async Task CreateUserAsync(User user)
         {
-            var usersContainer = await GetUsersContainerAsync();
-            return await _cosmosDbService.GetItemAsync<CoffeeAppAPI.Models.User>(usersContainer, id.ToString());
+            await CreateAsync(user);
         }
 
-        public async Task CreateUserAsync(CoffeeAppAPI.Models.User user)
+        public async Task UpdateUserAsync(User user)
         {
-            var usersContainer = await GetUsersContainerAsync();
-            await _cosmosDbService.AddItemAsync(usersContainer, user);
-        }
-
-        public async Task UpdateUserAsync(CoffeeAppAPI.Models.User user)
-        {
-            var usersContainer = await GetUsersContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(usersContainer, user.id.ToString(), user);
+            await UpdateAsync(user);
         }
     }
 }

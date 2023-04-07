@@ -1,54 +1,45 @@
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
-using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Repositories
 {
-    public class BadgeRepository
+    public interface IBadgeRepository : IRepository<Badge>
     {
-        private readonly ICosmosDbService _cosmosDbService;
+    }
 
+    public class BadgeRepository : CosmosDbRepository<Badge>, IBadgeRepository
+    {
         public BadgeRepository(ICosmosDbService cosmosDbService)
+            : base(cosmosDbService, "User", "/id", "Badge")
         {
-            _cosmosDbService = cosmosDbService;
-        }
-
-        public async Task<Container> GetBadgesContainerAsync()
-        {
-            return await _cosmosDbService.GetOrCreateContainerAsync("User", "/id");
         }
 
         public async Task<IEnumerable<Badge>> GetAllBadgesAsync()
         {
-            var badgesContainer = await GetBadgesContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Badge>(badgesContainer, "Badge");
+            return await GetAllAsync();
         }
 
         public async Task<Badge> GetBadgeAsync(Guid id)
         {
-            var badgesContainer = await GetBadgesContainerAsync();
-            return await _cosmosDbService.GetItemAsync<Badge>(badgesContainer, id.ToString());
+            return await GetAsync(id);
         }
 
         public async Task CreateBadgeAsync(Badge badge)
         {
-            var badgesContainer = await GetBadgesContainerAsync();
-            await _cosmosDbService.AddItemAsync(badgesContainer, badge);
+            await CreateAsync(badge);
         }
 
         public async Task UpdateBadgeAsync(Badge badge)
         {
-            var badgesContainer = await GetBadgesContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(badgesContainer, badge.id.ToString(), badge);
+            await UpdateAsync(badge);
         }
 
         public async Task DeleteBadgeAsync(Guid id)
         {
-            var badgesContainer = await GetBadgesContainerAsync();
-            await _cosmosDbService.DeleteItemAsync<Badge>(badgesContainer, id.ToString());
+            await DeleteAsync(id);
         }
     }
 }

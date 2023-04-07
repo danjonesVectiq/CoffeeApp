@@ -29,7 +29,7 @@ namespace CoffeeAppAPI.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Bio { get; set; }
-        public string ProfilePictureUrl { get; set; }
+        //public string ProfilePictureUrl { get; set; }
         public DateTime JoinDate { get; set; }
         public int TotalCheckins { get; set; }
         public int TotalUniqueCoffees { get; set; }
@@ -80,6 +80,8 @@ namespace CoffeeAppAPI.Models
     {
         public override string Type { get; } = "CoffeeShop";
         public string ImageUrl { get; set; }
+
+        public List<Photo> Photos { get; set; }
         public string CoffeeShopName { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
@@ -186,17 +188,16 @@ namespace CoffeeAppAPI.Models
             public string Description { get; set; }
             public DateTime UploadDate { get; set; }
         }
-
-        public class CoffeePhoto
+*/
+        public class Photo
         {
             public Guid id { get; set; }
-            public Guid CoffeeId { get; set; }
             public Guid UserId { get; set; }
-            public string PhotoUrl { get; set; }
+            public string ImageUrl { get; set; }
             public string Description { get; set; }
             public DateTime UploadDate { get; set; }
         }
-
+/*
         public class UserPhoto
         {
             public Guid id { get; set; }
