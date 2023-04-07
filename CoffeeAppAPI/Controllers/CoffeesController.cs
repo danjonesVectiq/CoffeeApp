@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
 using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Data;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -13,10 +14,41 @@ namespace CoffeeAppAPI.Controllers
     public class CoffeesController : ControllerBase
     {
         private readonly CoffeeRepository _coffeeRepository;
+        private readonly BlobStorageRepository _blobStorageRepository;
 
-        public CoffeesController(ICosmosDbService cosmosDbService)
+        public CoffeesController(ICosmosDbService cosmosDbService, IBlobStorageService blobStorageService)
         {
             _coffeeRepository = new CoffeeRepository(cosmosDbService);
+            _blobStorageRepository = new BlobStorageRepository(blobStorageService);
+        }
+
+        [HttpPost("{coffeeId}/upload-image")]
+        public async Task<IActionResult> UploadCoffeePicture(Guid coffeeId, [FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file received.");
+            }
+
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            stream.Position = 0;
+
+            string contentType = file.ContentType;
+
+        
+
+            // Create the blob name using coffeeId and a timestamp (or a GUID).
+            string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            string fileExtension = Helpers.BlobStorageHelpers.GetFileExtensionFromContentType(contentType);
+            string blobName = $"{coffeeId}/{timestamp}{fileExtension}";
+
+            var imageUrl = await _blobStorageRepository.UploadImageAsync(blobName, contentType, stream);
+            Coffee coffee = _coffeeRepository.GetCoffeeAsync(coffeeId).Result;
+            coffee.ImageUrl = imageUrl;
+            await _coffeeRepository.UpdateCoffeeAsync(coffee);
+
+            return Ok(new { ImageUrl = imageUrl });
         }
 
         [HttpGet]

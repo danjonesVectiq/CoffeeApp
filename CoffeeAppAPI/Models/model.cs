@@ -47,6 +47,7 @@ namespace CoffeeAppAPI.Models
     public class Coffee : BaseModel
     {
         public override string Type { get; } = "Coffee";
+        public string ImageUrl { get; set; }
         public string CoffeeName { get; set; }
         public string CoffeeType { get; set; }
         public string Origin { get; set; }

@@ -24,9 +24,10 @@ builder.Services.AddSingleton<SearchService>();
 builder.Services.AddSingleton<IndexManagementService>();
 builder.Services.AddSingleton<DataSeeder>();
 builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
+builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<ISearchRepository, SearchRepository>(); 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

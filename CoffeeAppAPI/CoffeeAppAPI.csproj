@@ -10,6 +10,8 @@
 
     <PackageReference Include="Azure.Search.Documents" Version="11.4.0" />
 
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.15.1" />
+
     <PackageReference Include="Bogus" Version="34.0.2" />
 
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
