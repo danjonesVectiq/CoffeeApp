@@ -4,7 +4,9 @@ using Azure.Search.Documents.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Azure.Core.Serialization;
 
 namespace CoffeeAppAPI.Services
 {
@@ -37,15 +39,11 @@ namespace CoffeeAppAPI.Services
 
         public async Task<SearchResults<T>> SearchAsync<T>(SearchIndexInstance indexInstance, string searchText, int topResults = 10, string typeFilter = null)
         {
-
-
             if (!IndexNames.TryGetValue(indexInstance, out string indexName))
             {
                 throw new ArgumentException("Invalid index provided.");
             }
-            Console.WriteLine($"Searching index {indexName} for {searchText}...");
             var searchClient = new SearchClient(_serviceEndpoint, indexName, _adminCredentials);
-            Console.WriteLine($"SearchClient: {searchClient}");
             var searchOptions = new SearchOptions
             {
                 Size = topResults,
@@ -53,11 +51,6 @@ namespace CoffeeAppAPI.Services
                 IncludeTotalCount = true,
                 Filter = typeFilter
             };
-
-            Console.WriteLine($"Search query: {searchText}");
-            Console.WriteLine($"Search options: {JsonConvert.SerializeObject(searchOptions)}");
-
-
             Response<SearchResults<T>> response = await searchClient.SearchAsync<T>(searchText, searchOptions);
             return response.Value;
         }

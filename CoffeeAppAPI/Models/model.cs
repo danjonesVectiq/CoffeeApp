@@ -87,7 +87,7 @@ namespace CoffeeAppAPI.Models
         public string PhoneNumber { get; set; }
         public string OperatingHours { get; set; }
         public List<Guid> AvailableCoffees { get; set; }
-         public Point Location { get; set; }
+        public Point Location { get; set; }
     }
 
 

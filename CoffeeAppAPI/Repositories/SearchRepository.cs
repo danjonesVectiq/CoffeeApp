@@ -26,10 +26,12 @@ namespace CoffeeAppAPI.Repositories
         }
         public async Task<SearchResults<CoffeeShopSearchResult>> SearchCoffeeShopsNearbyAsync(double latitude, double longitude, double radius, int topResults)
         {
-             var geoFilter = $"geo.distance(Location, geography'POINT({longitude} {latitude})') le {radius}";
+            var geoFilter = $"geo.distance(Location, geography'POINT({longitude} {latitude})') le {radius}";
+            var typeFilter = "Type eq 'CoffeeShop'";
 
-            return await _searchService.SearchAsync<CoffeeShopSearchResult>(SearchIndexInstance.Coffee, "*", topResults, $"Type eq 'CoffeeShop' and {geoFilter}");
+            return await _searchService.SearchAsync<CoffeeShopSearchResult>(SearchIndexInstance.Coffee, "*", topResults, $"{typeFilter} and {geoFilter}");
         }
+
         public async Task<SearchResults<CoffeeSearchResult>> SearchCoffeesAsync(string query, int topResults)
         {
             return await _searchService.SearchAsync<CoffeeSearchResult>(SearchIndexInstance.Coffee, query, topResults, "Type eq 'Coffee'");

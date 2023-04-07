@@ -13,6 +13,8 @@
     <PackageReference Include="Bogus" Version="34.0.2" />
 
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.3" />
+
+    <PackageReference Include="Microsoft.Azure.Core.Spatial" Version="1.1.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.32.2" />
     <PackageReference Include="Microsoft.Spatial" Version="7.15.0" />
 

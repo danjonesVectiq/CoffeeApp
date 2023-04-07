@@ -1,8 +1,10 @@
 using Azure.Core.GeoJson;
+using Azure.Core.Serialization;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
 using Microsoft.Spatial;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace CoffeeAppAPI.Models
 {
@@ -23,7 +25,7 @@ namespace CoffeeAppAPI.Models
 
         [SearchableField(IsSortable = true)]
         public string Username { get; set; }
-        
+
     }
 
 
@@ -53,7 +55,7 @@ namespace CoffeeAppAPI.Models
     }
     public class RoasterSearchResult : BaseSearchResult
     {
-  
+
         [SearchableField(IsSortable = true)]
         public string RoasterName { get; set; }
 
@@ -94,18 +96,18 @@ namespace CoffeeAppAPI.Models
         public string State { get; set; }
         [SearchableField(IsFilterable = true, IsFacetable = true)]
         public string Country { get; set; }
+
+        [JsonConverter(typeof(MicrosoftSpatialGeoJsonConverter))]
         [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double? Latitude { get; set; }
-        [SimpleField(IsFilterable = true, IsSortable = true)]
-        public double? Longitude { get; set; }
-        [SearchableField(IsFilterable = true, IsSortable = true)]
         public GeographyPoint? Location { get; set; }
+
+
     }
 
-   public class CombinedSearchResult
-{
-    public IEnumerable<CoffeeSearchResult> Coffees { get; set; }
-    public IEnumerable<CoffeeShopSearchResult> CoffeeShops { get; set; }
-    public IEnumerable<RoasterSearchResult> Roasters { get; set; }
-}
+    public class CombinedSearchResult
+    {
+        public IEnumerable<CoffeeSearchResult> Coffees { get; set; }
+        public IEnumerable<CoffeeShopSearchResult> CoffeeShops { get; set; }
+        public IEnumerable<RoasterSearchResult> Roasters { get; set; }
+    }
 }

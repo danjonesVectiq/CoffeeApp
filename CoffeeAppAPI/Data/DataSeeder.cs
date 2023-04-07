@@ -144,13 +144,12 @@ namespace CoffeeAppAPI.Data
                 // .RuleFor(c => c.FlavorNotes, f => f.Random.Shuffle(this.flavorNotes).Take(f.Random.Int(1, 3)))
                 .RuleFor(c => c.AverageRating, f => Math.Round(f.Random.Double(1, 5), 1))
                 .RuleFor(c => c.TotalRatings, f => f.Random.Number(1, 1000))
-               
+
                 .Generate(count);
             return coffees;
         }
         private List<CoffeeShop> GenerateCoffeeShops(int count, List<Coffee> coffees)
         {
-            GeoPoint geoPoint = new GeoPoint(47.6062, 122.3321);
             var coffeeShops = new Faker<CoffeeShop>()
                 .RuleFor(cs => cs.id, f => f.Random.Guid())
                 .RuleFor(cs => cs.CoffeeShopName, f => f.Company.CompanyName())
@@ -158,8 +157,10 @@ namespace CoffeeAppAPI.Data
                 .RuleFor(cs => cs.City, f => f.Address.City())
                 .RuleFor(cs => cs.State, f => f.Address.State())
                 .RuleFor(cs => cs.Country, f => f.Address.Country())
-                .RuleFor(cs => cs.Latitude, f => f.Address.Latitude())
-                 .RuleFor(c => c.Location, f => new Point(f.Address.Longitude(), f.Address.Latitude()))     
+                .RuleFor(c => c.Location, f => new Point(
+                    f.Random.Double(-35.458000, -35.126500), // Latitude range for Canberra
+                    f.Random.Double(148.968100, 149.281300) // Longitude range for Canberra
+                ))
                 .RuleFor(cs => cs.WebsiteUrl, f => f.Internet.Url())
                 .RuleFor(cs => cs.PhoneNumber, f => f.Phone.PhoneNumber())
                 .RuleFor(cs => cs.OperatingHours, f => "8:00 AM - 8:00 PM")

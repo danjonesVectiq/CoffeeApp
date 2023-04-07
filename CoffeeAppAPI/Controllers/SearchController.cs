@@ -41,20 +41,14 @@ namespace CoffeeAppAPI.Controllers
         [FromQuery] double radius,
         [FromQuery] int topResults = 10)
         {
-            try
-            {
+            
                 var results = await _searchRepository.SearchCoffeeShopsNearbyAsync(latitude, longitude, radius, topResults);
                 return Ok(new
                 {
                     totalCount = results.TotalCount,
                     results = results.GetResults().Select(r => r.Document)
                 });
-            }
-            catch (Exception ex)
-            {
-                // Log the exception as needed
-                return StatusCode(500, "An error occurred while processing your request.");
-            }
+           
         }
 
         [HttpGet("roasters")]
