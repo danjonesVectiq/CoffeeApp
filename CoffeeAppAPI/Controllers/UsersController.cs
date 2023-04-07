@@ -13,10 +13,40 @@ namespace CoffeeAppAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserRepository _userRepository;
+        private readonly BlobStorageRepository _blobStorageRepository;
 
         public UsersController(ICosmosDbService cosmosDbService)
         {
             _userRepository = new UserRepository(cosmosDbService);
+        }
+
+          [HttpPost("{userId}/upload-image")]
+        public async Task<IActionResult> UploadUserPicture(Guid userId, [FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file received.");
+            }
+
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            stream.Position = 0;
+
+            string contentType = file.ContentType;
+
+        
+
+            // Create the blob name using coffeeId and a timestamp (or a GUID).
+            string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            string fileExtension = Helpers.BlobStorageHelpers.GetFileExtensionFromContentType(contentType);
+            string blobName = $"{userId}/{timestamp}{fileExtension}";
+
+            var imageUrl = await _blobStorageRepository.UploadImageAsync(blobName, contentType, stream);
+            User user = _userRepository.GetUserAsync(userId).Result;
+            user.ImageUrl = imageUrl;
+            await _userRepository.UpdateUserAsync(user);
+
+            return Ok(new { ImageUrl = imageUrl });
         }
 
         [HttpGet("{id}/preferences")]
@@ -41,7 +71,7 @@ namespace CoffeeAppAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(string id)
+        public async Task<ActionResult<User>> GetUser(Guid id)
         {
             var user = await _userRepository.GetUserAsync(id);
 
@@ -74,7 +104,7 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingUser = await _userRepository.GetUserAsync(id.ToString());
+            var existingUser = await _userRepository.GetUserAsync(id);
 
             if (existingUser == null)
             {

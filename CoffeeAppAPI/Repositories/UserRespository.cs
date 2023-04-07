@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Repositories
             return await _cosmosDbService.GetAllItemsAsync<CoffeeAppAPI.Models.User>(usersContainer, "User");
         }
 
-        public async Task<CoffeeAppAPI.Models.User> GetUserAsync(string id)
+        public async Task<CoffeeAppAPI.Models.User> GetUserAsync(Guid id)
         {
             var usersContainer = await GetUsersContainerAsync();
             return await _cosmosDbService.GetItemAsync<CoffeeAppAPI.Models.User>(usersContainer, id.ToString());

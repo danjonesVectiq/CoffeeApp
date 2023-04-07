@@ -16,39 +16,39 @@ namespace CoffeeAppAPI.Repositories
             _cosmosDbService = cosmosDbService;
         }
 
-        public async Task<Container> GetCoffeeShopsContainerAsync()
+        public async Task<Container> GetCoffeeShopContainerAsync()
         {
             return await _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id");
         }
 
-        public async Task<IEnumerable<Coffee>> GetAllCoffeesAsync()
+        public async Task<IEnumerable<CoffeeShop>> GetAllCoffeeShopsAsync()
         {
-            var coffeeShopsContainer = await GetCoffeeShopsContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Coffee>(coffeeShopsContainer, "CoffeeShop");
+            var coffeeShopContainer = await GetCoffeeShopContainerAsync();
+            return await _cosmosDbService.GetAllItemsAsync<CoffeeShop>(coffeeShopContainer, "CoffeeShop");
         }
 
-        public async Task<Coffee> GetCoffeeAsync(Guid id)
+        public async Task<CoffeeShop> GetCoffeeShopAsync(Guid id)
         {
-            var coffeeShopsContainer = await GetCoffeeShopsContainerAsync();
-            return await _cosmosDbService.GetItemAsync<Coffee>(coffeeShopsContainer, id.ToString());
+            var coffeeShopsContainer = await GetCoffeeShopContainerAsync();
+            return await _cosmosDbService.GetItemAsync<CoffeeShop>(coffeeShopsContainer, id.ToString());
         }
 
-        public async Task CreateCoffeeShopAsync(CoffeeShop coffee)
+        public async Task CreateCoffeeShopAsync(CoffeeShop coffeeShop)
         {
-            var coffeeShopsContainer = await GetCoffeeShopsContainerAsync();
-            await _cosmosDbService.AddItemAsync(coffeeShopsContainer, coffee);
+            var coffeeShopsContainer = await GetCoffeeShopContainerAsync();
+            await _cosmosDbService.AddItemAsync(coffeeShopsContainer, coffeeShop);
         }
 
-        public async Task UpdateCoffeeAsync(Coffee coffee)
+        public async Task UpdateCoffeeShopAsync(CoffeeShop coffeeShop)
         {
-            var coffeeShopsContainer = await GetCoffeeShopsContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(coffeeShopsContainer, coffee.id.ToString(), coffee);
+            var coffeeShopsContainer = await GetCoffeeShopContainerAsync();
+            await _cosmosDbService.UpdateItemAsync(coffeeShopsContainer, coffeeShop.id.ToString(), coffeeShop);
         }
 
-        public async Task DeleteCoffeeAsync(Guid id)
+        public async Task DeleteCoffeeShopAsync(Guid id)
         {
-            var coffeeShopsContainer = await GetCoffeeShopsContainerAsync();
-            await _cosmosDbService.DeleteItemAsync<Coffee>(coffeeShopsContainer, id.ToString());
+            var coffeeShopsContainer = await GetCoffeeShopContainerAsync();
+            await _cosmosDbService.DeleteItemAsync<CoffeeShop>(coffeeShopsContainer, id.ToString());
         }
     }
 }
