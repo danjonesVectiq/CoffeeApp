@@ -22,6 +22,7 @@ namespace CoffeeAppAPI.Models
     public class User : BaseModel
     {
         public override string Type { get; } = "User";
+        public string ImageUrl { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
@@ -61,6 +62,7 @@ namespace CoffeeAppAPI.Models
     public class Roaster : BaseModel
     {
         public override string Type { get; } = "Roaster";
+        public string ImageUrl { get; set; }
         public string RoasterName { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
@@ -77,6 +79,7 @@ namespace CoffeeAppAPI.Models
     public class CoffeeShop : BaseModel
     {
         public override string Type { get; } = "CoffeeShop";
+        public string ImageUrl { get; set; }
         public string CoffeeShopName { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
