@@ -19,6 +19,31 @@ namespace CoffeeAppAPI.Controllers
             _checkInRepository = checkInRepository;
         }
       
+      [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<CheckIn>>> GetUserCheckInHistory(Guid userId)
+        {
+            var checkIns = await _checkInRepository.GetUserCheckInsAsync(userId);
+
+            if (checkIns == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(checkIns);
+        }
+
+        [HttpGet("coffeeshop/{coffeeShopId}")]
+        public async Task<ActionResult<IEnumerable<CheckIn>>> GetCoffeeShopCheckIns(Guid coffeeShopId)
+        {
+            var checkIns = await _checkInRepository.GetCoffeeShopCheckInsAsync(coffeeShopId);
+
+            if (checkIns == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(checkIns);
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CheckIn>>> GetAllCheckIns()

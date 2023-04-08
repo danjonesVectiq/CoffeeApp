@@ -168,14 +168,7 @@ namespace CoffeeAppAPI.Models
         public string CommentText { get; set; }
         public DateTime CommentDate { get; set; }
     }
-    /* 
-        public class UserFollowing
-        {
-            public Guid id { get; set; }
-            public Guid FollowerId { get; set; }
-            public Guid FolloweeId { get; set; }
-            public DateTime FollowDate { get; set; }
-        } */
+   
 
     public class Notification : BaseModel
     {
@@ -197,6 +190,15 @@ namespace CoffeeAppAPI.Models
         public DateTime CreatedDate { get; set; }
     }
 
+     public class Photo
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public string ImageUrl { get; set; }
+        public string Description { get; set; }
+        public DateTime UploadDate { get; set; }
+    }
+
     /*     public class CoffeeShopPhoto
         {
             public Guid id { get; set; }
@@ -207,14 +209,15 @@ namespace CoffeeAppAPI.Models
             public DateTime UploadDate { get; set; }
         }
 */
-    public class Photo
-    {
-        public Guid id { get; set; }
-        public Guid UserId { get; set; }
-        public string ImageUrl { get; set; }
-        public string Description { get; set; }
-        public DateTime UploadDate { get; set; }
-    }
+   
+     /* 
+        public class UserFollowing
+        {
+            public Guid id { get; set; }
+            public Guid FollowerId { get; set; }
+            public Guid FolloweeId { get; set; }
+            public DateTime FollowDate { get; set; }
+        } */
     /*
             public class UserPhoto
             {

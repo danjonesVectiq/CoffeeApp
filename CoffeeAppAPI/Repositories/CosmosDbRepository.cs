@@ -39,6 +39,7 @@ namespace CoffeeAppAPI.Repositories
         {
             return await _cosmosDbService.GetItemAsync<T>(_container, id.ToString());
         }
+    
         public async Task CreateAsync(T entity)
         {
             await _cosmosDbService.AddItemAsync(_container, entity);
