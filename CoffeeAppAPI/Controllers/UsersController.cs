@@ -12,13 +12,15 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly UserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly BlobStorageRepository _blobStorageRepository;
 
-        public UsersController(ICosmosDbService cosmosDbService)
+        public UsersController(IUserRepository userRepository, BlobStorageRepository blobStorageRepository)
         {
-            _userRepository = new UserRepository(cosmosDbService);
+            _userRepository = userRepository;
+            _blobStorageRepository = blobStorageRepository;
         }
+       
 
         [HttpPost("{userId}/upload-image")]
         public async Task<IActionResult> UploadUserPicture(Guid userId, [FromForm] IFormFile file)

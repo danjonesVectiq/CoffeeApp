@@ -12,24 +12,25 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CheckInsController : ControllerBase
     {
-        private readonly CheckInRepository _checkInRepository;
+        private readonly ICheckInRepository _checkInRepository;
 
-        public CheckInsController(ICosmosDbService cosmosDbService)
+        public CheckInsController(ICheckInRepository checkInRepository)
         {
-            _checkInRepository = new CheckInRepository(cosmosDbService);
+            _checkInRepository = checkInRepository;
         }
+      
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CheckIn>>> GetAllCheckIns()
         {
-            var checkIns = await _checkInRepository.GetAllCheckInsAsync();
+            var checkIns = await _checkInRepository.GetAllAsync();
             return Ok(checkIns);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CheckIn>> GetCheckIn(Guid id)
         {
-            var checkIn = await _checkInRepository.GetCheckInAsync(id);
+            var checkIn = await _checkInRepository.GetAsync(id);
 
             if (checkIn == null)
             {
@@ -48,7 +49,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             checkIn.id = Guid.NewGuid();
-            await _checkInRepository.CreateCheckInAsync(checkIn);
+            await _checkInRepository.CreateAsync(checkIn);
             return CreatedAtAction(nameof(GetCheckIn), new { id = checkIn.id }, checkIn);
         }
 
@@ -60,28 +61,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingCheckIn = await _checkInRepository.GetCheckInAsync(id);
+            var existingCheckIn = await _checkInRepository.GetAsync(id);
 
             if (existingCheckIn == null)
             {
                 return NotFound();
             }
 
-            await _checkInRepository.UpdateCheckInAsync(checkIn);
+            await _checkInRepository.UpdateAsync(checkIn);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCheckIn(Guid id)
         {
-            var existingCheckIn = await _checkInRepository.GetCheckInAsync(id);
+            var existingCheckIn = await _checkInRepository.GetAsync(id);
 
             if (existingCheckIn == null)
             {
                 return NotFound();
             }
 
-            await _checkInRepository.DeleteCheckInAsync(id);
+            await _checkInRepository.DeleteAsync(id);
             return NoContent();
         }
     }

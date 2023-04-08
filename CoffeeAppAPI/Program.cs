@@ -31,8 +31,8 @@ builder.Services.AddScoped<ICoffeeShopRepository, CoffeeShopRepository>();
 builder.Services.AddScoped<IRoasterRepository, RoasterRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+builder.Services.AddScoped<ICheckInRepository, CheckInRepository>();
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
