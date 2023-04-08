@@ -26,6 +26,11 @@ builder.Services.AddSingleton<DataSeeder>();
 builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
 builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<ISearchRepository, SearchRepository>(); 
+builder.Services.AddScoped<ICoffeeRepository, CoffeeRepository>();
+builder.Services.AddScoped<ICoffeeShopRepository, CoffeeShopRepository>();
+builder.Services.AddScoped<IRoasterRepository, RoasterRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();

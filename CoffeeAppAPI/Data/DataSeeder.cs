@@ -21,6 +21,15 @@ namespace CoffeeAppAPI.Data
         private readonly List<string> roastLevels = new List<string> { "Light", "Medium", "Medium-Dark", "Dark", "Extra Dark", };
         private readonly string[] flavorNotes = new string[] { "Chocolate", "Fruity", "Floral", "Nutty", "Spicy", "Sweet" };
         private readonly List<string> origins = new List<string> { "Colombia", "Ethiopia", "Brazil", "Guatemala", "Kenya" };
+        private readonly string[] grindSizes = {
+            "Extra Coarse", // Cold Brew, Cowboy Coffee
+            "Coarse",       // French Press, Percolator
+            "Medium-Coarse",// Chemex, Clever Dripper
+            "Medium",       // Drip Coffee Makers, Siphon, Aeropress (3+ minutes brew time)
+            "Medium-Fine",  // Pour Over, V60, Aeropress (1-2 minutes brew time)
+            "Fine",         // Espresso, Moka Pot, Aeropress (30 seconds brew time)
+            "Extra Fine",   // Turkish Coffee
+        };
         private readonly List<string> brewingMethods = new List<string> { "Pour Over", "French Press", "Aeropress", "Espresso Machine", "Cold Brew" };
 
         public DataSeeder(ICosmosDbService cosmosDbService)
@@ -51,7 +60,8 @@ namespace CoffeeAppAPI.Data
             await SeedComments(comments);
             var notifications = GenerateNotifications(users, 10);
             await SeedNotifications(notifications);
-
+            var recipes = GenerateRecipes(coffees, users, 10);
+            await SeedRecipes(recipes);
             /* var friendRequests = GenerateFriendRequests(users, 5);
            await SeedFriendRequests(friendRequests); */
 
@@ -115,6 +125,27 @@ namespace CoffeeAppAPI.Data
                 }))
                 .Generate(count);
         }
+
+        private List<Recipe> GenerateRecipes(List<Coffee> coffee, List<Models.User> users, int count)
+        {
+            return new Faker<Recipe>()
+                .RuleFor(r => r.id, f => f.Random.Guid())
+                .RuleFor(r => r.CoffeeId, f => f.PickRandom(coffee).id)
+                .RuleFor(r => r.UserId, f => f.PickRandom(users).id)
+                .RuleFor(r => r.BrewingMethod, f => f.PickRandom(brewingMethods))
+                .RuleFor(r => r.BrewTime, f => f.Random.Number(1, 10))
+                .RuleFor(r => r.Temperature, f => f.Random.Number(1, 10))
+                .RuleFor(r => r.GrindSize, f => f.PickRandom(grindSizes))
+                .RuleFor(r => r.WaterAmount, f => f.Random.Number(1, 10))
+                .RuleFor(r => r.CoffeeAmount, f => f.Random.Number(1, 10))
+                .RuleFor(r => r.Instructions, f => f.Lorem.Sentence())
+                .RuleFor(r => r.PersonalExperience, f => f.Lorem.Sentence())
+                .RuleFor(r => r.RecipeName, f => f.Lorem.Sentence())
+               // .RuleFor(r => r.Rating, f => f.Random.Number(1, 5))
+               // .RuleFor(r => r.Review, f => f.Lorem.Sentence())
+                .RuleFor(r => r.AddedDate, f => f.Date.Past())
+                .Generate(count);
+        }
         private List<Roaster> GenerateRoasters(int count)
         {
             var roasters = new Faker<Roaster>()
@@ -169,7 +200,6 @@ namespace CoffeeAppAPI.Data
                 .RuleFor(cs => cs.OperatingHours, f => "8:00 AM - 8:00 PM")
                 .RuleFor(cs => cs.AvailableCoffees, f => f.Random.ListItems(coffees, f.Random.Number(1, coffees.Count)).Select(c => c.id).ToList())
                 .Generate(count);
-            Console.WriteLine(coffeeShops[0].Type);
             return coffeeShops;
         }
         private List<CheckIn> GenerateCheckIns(List<CoffeeAppAPI.Models.User> users, List<Coffee> coffees, List<CoffeeShop> coffeeShops, int count)
@@ -387,6 +417,15 @@ namespace CoffeeAppAPI.Data
             foreach (var coffeeShop in coffeeShops)
             {
                 await _cosmosDbService.AddItemAsync(container, coffeeShop);
+            }
+        }
+
+         private async Task SeedRecipes(List<Recipe> recipes)
+        {
+            var container = _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id").Result;
+            foreach (var recipe in recipes)
+            {
+                await _cosmosDbService.AddItemAsync(container, recipe);
             }
         }
 

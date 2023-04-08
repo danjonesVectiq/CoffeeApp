@@ -22,14 +22,14 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Recommendation>>> GetAllRecommendations()
         {
-            var recommendations = await _recommendationRepository.GetAllRecommendationsAsync();
+            var recommendations = await _recommendationRepository.GetAllAsync();
             return Ok(recommendations);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Recommendation>> GetRecommendation(Guid id)
         {
-            var recommendation = await _recommendationRepository.GetRecommendationAsync(id);
+            var recommendation = await _recommendationRepository.GetAsync(id);
 
             if (recommendation == null)
             {
@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             recommendation.id = Guid.NewGuid();
-            await _recommendationRepository.CreateRecommendationAsync(recommendation);
+            await _recommendationRepository.CreateAsync(recommendation);
             return CreatedAtAction(nameof(GetRecommendation), new { id = recommendation.id }, recommendation);
         }
 
@@ -60,28 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingRecommendation = await _recommendationRepository.GetRecommendationAsync(id);
+            var existingRecommendation = await _recommendationRepository.GetAsync(id);
 
             if (existingRecommendation == null)
             {
                 return NotFound();
             }
 
-            await _recommendationRepository.UpdateRecommendationAsync(recommendation);
+            await _recommendationRepository.UpdateAsync(recommendation);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteRecommendation(Guid id)
         {
-            var existingRecommendation = await _recommendationRepository.GetRecommendationAsync(id);
+            var existingRecommendation = await _recommendationRepository.GetAsync(id);
 
             if (existingRecommendation == null)
             {
                 return NotFound();
             }
 
-            await _recommendationRepository.DeleteRecommendationAsync(id);
+            await _recommendationRepository.DeleteAsync(id);
             return NoContent();
         }
     }

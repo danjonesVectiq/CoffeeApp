@@ -44,6 +44,24 @@ namespace CoffeeAppAPI.Models
         public List<Notification> Notifications { get; set; }
         public List<Badge> Badges { get; set; }
     }
+    public class Recipe : BaseModel
+    {
+        public override string Type { get; } = "Recipe";
+        public Guid CoffeeId { get; set; }
+        public Guid UserId { get; set; } // User who added the recipe
+        public string RecipeName { get; set; }
+        public string BrewingMethod { get; set; }
+        public double CoffeeAmount { get; set; } // in grams
+        public double WaterAmount { get; set; } // in milliliters
+        public double BrewTime { get; set; } // in seconds
+        public string GrindSize { get; set; }
+        public double Temperature { get; set; } // in Celsius
+        public string Instructions { get; set; }
+        public string PersonalExperience { get; set; }
+        public DateTime AddedDate { get; set; }
+        //public List<RecipeLike> RecipeLikes { get; set; }
+        // public List<RecipeComment> RecipeComments { get; set; }
+    }
 
     public class Coffee : BaseModel
     {
@@ -189,23 +207,23 @@ namespace CoffeeAppAPI.Models
             public DateTime UploadDate { get; set; }
         }
 */
-        public class Photo
-        {
-            public Guid id { get; set; }
-            public Guid UserId { get; set; }
-            public string ImageUrl { get; set; }
-            public string Description { get; set; }
-            public DateTime UploadDate { get; set; }
-        }
-/*
-        public class UserPhoto
-        {
-            public Guid id { get; set; }
-            public Guid UserId { get; set; }
-            public string PhotoUrl { get; set; }
-            public string Description { get; set; }
-            public DateTime UploadDate { get; set; }
-        } */
+    public class Photo
+    {
+        public Guid id { get; set; }
+        public Guid UserId { get; set; }
+        public string ImageUrl { get; set; }
+        public string Description { get; set; }
+        public DateTime UploadDate { get; set; }
+    }
+    /*
+            public class UserPhoto
+            {
+                public Guid id { get; set; }
+                public Guid UserId { get; set; }
+                public string PhotoUrl { get; set; }
+                public string Description { get; set; }
+                public DateTime UploadDate { get; set; }
+            } */
     /*     public class FriendRequest
         {
             public Guid id { get; set; }

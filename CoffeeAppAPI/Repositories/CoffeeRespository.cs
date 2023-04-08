@@ -20,29 +20,6 @@ namespace CoffeeAppAPI.Repositories
 
         // Implement any Coffee-specific methods here, if needed
 
-        public async Task<IEnumerable<Coffee>> GetAllCoffeesAsync()
-        {
-            return await GetAllAsync();
-        }
-
-        public async Task<Coffee> GetCoffeeAsync(Guid id)
-        {
-            return await GetAsync(id);
-        }
-
-        public async Task CreateCoffeeAsync(Coffee coffee)
-        {
-            await CreateAsync(coffee);
-        }
-
-        public async Task UpdateCoffeeAsync(Coffee coffee)
-        {
-            await UpdateAsync(coffee);
-        }
-
-        public async Task DeleteCoffeeAsync(Guid id)
-        {
-            await DeleteAsync(id);
-        }
+      
     }
 }

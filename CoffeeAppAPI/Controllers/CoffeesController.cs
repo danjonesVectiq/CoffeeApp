@@ -13,12 +13,12 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CoffeesController : ControllerBase
     {
-        private readonly CoffeeRepository _coffeeRepository;
+        private readonly ICoffeeRepository _coffeeRepository;
         private readonly BlobStorageRepository _blobStorageRepository;
 
-        public CoffeesController(ICosmosDbService cosmosDbService, IBlobStorageService blobStorageService)
+        public CoffeesController(ICoffeeRepository coffeeRepository, IBlobStorageService blobStorageService)
         {
-            _coffeeRepository = new CoffeeRepository(cosmosDbService);
+            _coffeeRepository = coffeeRepository;
             _blobStorageRepository = new BlobStorageRepository(blobStorageService);
         }
 
@@ -44,9 +44,9 @@ namespace CoffeeAppAPI.Controllers
             string blobName = $"{coffeeId}/{timestamp}{fileExtension}";
 
             var imageUrl = await _blobStorageRepository.UploadImageAsync(blobName, contentType, stream);
-            Coffee coffee = _coffeeRepository.GetCoffeeAsync(coffeeId).Result;
+            Coffee coffee = _coffeeRepository.GetAsync(coffeeId).Result;
             coffee.ImageUrl = imageUrl;
-            await _coffeeRepository.UpdateCoffeeAsync(coffee);
+            await _coffeeRepository.UpdateAsync(coffee);
 
             return Ok(new { ImageUrl = imageUrl });
         }
@@ -54,14 +54,14 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Coffee>>> GetAllCoffees()
         {
-            var coffees = await _coffeeRepository.GetAllCoffeesAsync();
+            var coffees = await _coffeeRepository.GetAllAsync();
             return Ok(coffees);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Coffee>> GetCoffee(Guid id)
         {
-            var coffee = await _coffeeRepository.GetCoffeeAsync(id);
+            var coffee = await _coffeeRepository.GetAsync(id);
 
             if (coffee == null)
             {
@@ -80,7 +80,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             coffee.id = Guid.NewGuid();
-            await _coffeeRepository.CreateCoffeeAsync(coffee);
+            await _coffeeRepository.CreateAsync(coffee);
             return CreatedAtAction(nameof(GetCoffee), new { id = coffee.id }, coffee);
         }
 
@@ -92,28 +92,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingCoffee = await _coffeeRepository.GetCoffeeAsync(id);
+            var existingCoffee = await _coffeeRepository.GetAsync(id);
 
             if (existingCoffee == null)
             {
                 return NotFound();
             }
 
-            await _coffeeRepository.UpdateCoffeeAsync(coffee);
+            await _coffeeRepository.UpdateAsync(coffee);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCoffee(Guid id)
         {
-            var existingCoffee = await _coffeeRepository.GetCoffeeAsync(id);
+            var existingCoffee = await _coffeeRepository.GetAsync(id);
 
             if (existingCoffee == null)
             {
                 return NotFound();
             }
 
-            await _coffeeRepository.DeleteCoffeeAsync(id);
+            await _coffeeRepository.DeleteAsync(id);
             return NoContent();
         }
     }

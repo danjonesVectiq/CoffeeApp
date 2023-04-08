@@ -7,48 +7,20 @@ using System.Threading.Tasks;
 
 namespace CoffeeAppAPI.Repositories
 {
-    public class RecommendationRepository
+    public interface IRecommendationRepository : IRepository<Recommendation>
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        
+    }
+    
+    public class RecommendationRepository : CosmosDbRepository<Recommendation>, IRecommendationRepository
+    {
 
-        public RecommendationRepository(ICosmosDbService cosmosDbService)
+
+         public RecommendationRepository(ICosmosDbService cosmosDbService)
+            : base(cosmosDbService, "Coffee", "/id", "Recommendation")
         {
-            _cosmosDbService = cosmosDbService;
         }
 
-        public async Task<Container> GetRecommendationsContainerAsync()
-        {
-            return await _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id");
-        }
-
-        public async Task<IEnumerable<Recommendation>> GetAllRecommendationsAsync()
-        {
-            var recommendationsContainer = await GetRecommendationsContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Recommendation>(recommendationsContainer, "Recommendation");
-        }
-
-        public async Task<Recommendation> GetRecommendationAsync(Guid id)
-        {
-            var recommendationsContainer = await GetRecommendationsContainerAsync();
-            return await _cosmosDbService.GetItemAsync<Recommendation>(recommendationsContainer, id.ToString());
-        }
-
-        public async Task CreateRecommendationAsync(Recommendation recommendation)
-        {
-            var recommendationsContainer = await GetRecommendationsContainerAsync();
-            await _cosmosDbService.AddItemAsync(recommendationsContainer, recommendation);
-        }
-
-        public async Task UpdateRecommendationAsync(Recommendation recommendation)
-        {
-            var recommendationsContainer = await GetRecommendationsContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(recommendationsContainer, recommendation.id.ToString(), recommendation);
-        }
-
-        public async Task DeleteRecommendationAsync(Guid id)
-        {
-            var recommendationsContainer = await GetRecommendationsContainerAsync();
-            await _cosmosDbService.DeleteItemAsync<Recommendation>(recommendationsContainer, id.ToString());
-        }
+        
     }
 }

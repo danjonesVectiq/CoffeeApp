@@ -20,18 +20,16 @@ namespace CoffeeAppAPI.Repositories
     // CosmosDbRepository.cs
     public class CosmosDbRepository<T> : IRepository<T> where T : class, IBaseModel
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        protected readonly ICosmosDbService _cosmosDbService;
         private readonly Container _container;
-
+        protected Container Container => _container;
         private readonly string _entityType;
-
         public CosmosDbRepository(ICosmosDbService cosmosDbService, string containerId, string partitionKeyPath, string entityType)
         {
             _cosmosDbService = cosmosDbService;
             _container = _cosmosDbService.GetOrCreateContainerAsync(containerId, partitionKeyPath).GetAwaiter().GetResult();
             _entityType = entityType;
         }
-
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _cosmosDbService.GetAllItemsAsync<T>(_container, _entityType);
@@ -41,18 +39,15 @@ namespace CoffeeAppAPI.Repositories
         {
             return await _cosmosDbService.GetItemAsync<T>(_container, id.ToString());
         }
-
         public async Task CreateAsync(T entity)
         {
             await _cosmosDbService.AddItemAsync(_container, entity);
         }
-
         public async Task UpdateAsync(T entity)
         {
             var id = entity.GetType().GetProperty("id").GetValue(entity).ToString();
             await _cosmosDbService.UpdateItemAsync(_container, id, entity);
         }
-
         public async Task DeleteAsync(Guid id)
         {
             await _cosmosDbService.DeleteItemAsync<T>(_container, id.ToString());

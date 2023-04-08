@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
 
 namespace CoffeeAppAPI.Controllers
@@ -12,15 +13,16 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CoffeeShopsController : ControllerBase
     {
-        private readonly CoffeeShopRepository _coffeeShopRepository;
+        private readonly ICoffeeShopRepository _coffeeShopRepository;
         private readonly BlobStorageRepository _blobStorageRepository;
 
-        public CoffeeShopsController(ICosmosDbService cosmosDbService, BlobStorageService blobStorageService)
+        public CoffeeShopsController(ICoffeeShopRepository coffeeShopRepository, BlobStorageRepository blobStorageRepository)
         {
-            _coffeeShopRepository = new CoffeeShopRepository(cosmosDbService);
-            _blobStorageRepository = new BlobStorageRepository(blobStorageService);
+            _coffeeShopRepository = coffeeShopRepository;
+            _blobStorageRepository = blobStorageRepository;
         }
-         [HttpPost("{coffeeShopId}/upload-image")]
+
+        [HttpPost("{coffeeShopId}/upload-image")]
         public async Task<IActionResult> UploadCoffeeShopPicture(Guid coffeeShopId, [FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -34,17 +36,15 @@ namespace CoffeeAppAPI.Controllers
 
             string contentType = file.ContentType;
 
-        
-
             // Create the blob name using coffeeId and a timestamp (or a GUID).
             string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
             string fileExtension = Helpers.BlobStorageHelpers.GetFileExtensionFromContentType(contentType);
             string blobName = $"{coffeeShopId}/{timestamp}{fileExtension}";
 
             var imageUrl = await _blobStorageRepository.UploadImageAsync(blobName, contentType, stream);
-            CoffeeShop coffeeShop = _coffeeShopRepository.GetCoffeeShopAsync(coffeeShopId).Result;
+            CoffeeShop coffeeShop = await _coffeeShopRepository.GetAsync(coffeeShopId);
             coffeeShop.ImageUrl = imageUrl;
-            await _coffeeShopRepository.UpdateCoffeeShopAsync(coffeeShop);
+            await _coffeeShopRepository.UpdateAsync(coffeeShop);
 
             return Ok(new { ImageUrl = imageUrl });
         }
@@ -52,14 +52,14 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CoffeeShop>>> GetAllCoffeeShops()
         {
-            var coffees = await _coffeeShopRepository.GetAllCoffeeShopsAsync();
+            var coffees = await _coffeeShopRepository.GetAllAsync();
             return Ok(coffees);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CoffeeShop>> GetCoffeeShop(Guid id)
         {
-            var coffeeShop = await _coffeeShopRepository.GetCoffeeShopAsync(id);
+            var coffeeShop = await _coffeeShopRepository.GetAsync(id);
 
             if (coffeeShop == null)
             {
@@ -76,9 +76,8 @@ namespace CoffeeAppAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
             coffeeShop.id = Guid.NewGuid();
-            await _coffeeShopRepository.CreateCoffeeShopAsync(coffeeShop);
+            await _coffeeShopRepository.CreateAsync(coffeeShop);
             return CreatedAtAction(nameof(GetCoffeeShop), new { id = coffeeShop.id }, coffeeShop);
         }
 
@@ -90,28 +89,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingCoffee = await _coffeeShopRepository.GetCoffeeShopAsync(id);
+            var existingCoffee = await _coffeeShopRepository.GetAsync(id);
 
             if (existingCoffee == null)
             {
                 return NotFound();
             }
 
-            await _coffeeShopRepository.UpdateCoffeeShopAsync(coffeeShop);
+            await _coffeeShopRepository.UpdateAsync(coffeeShop);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCoffeeShop(Guid id)
         {
-            var existingCoffeeShop = await _coffeeShopRepository.GetCoffeeShopAsync(id);
+            var existingCoffeeShop = await _coffeeShopRepository.GetAsync(id);
 
             if (existingCoffeeShop == null)
             {
                 return NotFound();
             }
 
-            await _coffeeShopRepository.DeleteCoffeeShopAsync(id);
+            await _coffeeShopRepository.DeleteAsync(id);
             return NoContent();
         }
     }

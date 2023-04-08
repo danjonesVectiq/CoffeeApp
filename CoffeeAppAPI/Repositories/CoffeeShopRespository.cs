@@ -17,32 +17,5 @@ namespace CoffeeAppAPI.Repositories
             : base(cosmosDbService, "Coffee", "/id", "CoffeeShop")
         {
         }
-
-        // Implement any CoffeeShop-specific methods here, if needed
-
-        public async Task<IEnumerable<CoffeeShop>> GetAllCoffeeShopsAsync()
-        {
-            return await GetAllAsync();
-        }
-
-        public async Task<CoffeeShop> GetCoffeeShopAsync(Guid id)
-        {
-            return await GetAsync(id);
-        }
-
-        public async Task CreateCoffeeShopAsync(CoffeeShop coffeeShop)
-        {
-            await CreateAsync(coffeeShop);
-        }
-
-        public async Task UpdateCoffeeShopAsync(CoffeeShop coffeeShop)
-        {
-            await UpdateAsync(coffeeShop);
-        }
-
-        public async Task DeleteCoffeeShopAsync(Guid id)
-        {
-            await DeleteAsync(id);
-        }
     }
 }

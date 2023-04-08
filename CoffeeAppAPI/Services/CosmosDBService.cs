@@ -19,25 +19,37 @@ namespace CoffeeAppAPI.Services
         Task UpdateItemAsync<T>(Container container, string id, T item) where T : class, IBaseModel;
         Task DeleteItemAsync<T>(Container container, string id) where T : class, IBaseModel;
         Task DeleteAllItemsAsync<T>(Container container) where T : class, IBaseModel;
+        Task<IEnumerable<T>> GetItemsByCustomQueryAsync<T>(Container container, QueryDefinition queryDefinition) where T : class, IBaseModel;
+
     }
 
     public class CosmosDbService : ICosmosDbService
     {
         private readonly CosmosClient _cosmosClient;
-
         public CosmosDbService(IConfiguration configuration)
         {
             var cosmosDbConfig = configuration.GetSection("CosmosDb");
             var connectionString = cosmosDbConfig["ConnectionString"];
             _cosmosClient = new CosmosClient(connectionString);
         }
-
         public async Task<Container> GetOrCreateContainerAsync(string containerId, string partitionKeyPath)
         {
             var database = _cosmosClient.GetDatabase("CoffeeApp");
             var containerProperties = new ContainerProperties(containerId, partitionKeyPath);
             var containerResponse = await database.CreateContainerIfNotExistsAsync(containerProperties);
             return containerResponse.Container;
+        }
+        public async Task<IEnumerable<T>> GetItemsByCustomQueryAsync<T>(Container container, QueryDefinition queryDefinition) where T : class, IBaseModel
+        {
+            var results = new List<T>();
+            var resultSetIterator = container.GetItemQueryIterator<T>(queryDefinition);
+
+            while (resultSetIterator.HasMoreResults)
+            {
+                var response = await resultSetIterator.ReadNextAsync();
+                results.AddRange(response.Resource);
+            }
+            return results;
         }
         public async Task<IEnumerable<T>> GetAllItemsAsync<T>(Container container, string itemType = null) where T : IBaseModel
         {
@@ -47,20 +59,15 @@ namespace CoffeeAppAPI.Services
             {
                 queryable = queryable.Where(x => x.Type == itemType);
             }
-
             var query = queryable.ToFeedIterator();
             var results = new List<T>();
-
             while (query.HasMoreResults)
             {
                 var response = await query.ReadNextAsync();
                 results.AddRange(response);
             }
-
             return results;
         }
-
-
         public async Task<T> GetItemAsync<T>(Container container, string id) where T : IBaseModel
         {
             try
@@ -74,11 +81,10 @@ namespace CoffeeAppAPI.Services
             }
         }
 
-        public async Task AddItemAsync<T>(Container container, T item) where T: class, IBaseModel
+        public async Task AddItemAsync<T>(Container container, T item) where T : class, IBaseModel
         {
             await container.CreateItemAsync(item);
         }
-
         public async Task UpdateItemAsync<T>(Container container, string id, T item) where T : class, IBaseModel
         {
             await container.ReplaceItemAsync(item, id, new PartitionKey(id));
@@ -115,6 +121,5 @@ namespace CoffeeAppAPI.Services
                 await container.DeleteItemAsync<T>(id, new PartitionKey(id));
             }
         }
-
     }
 }

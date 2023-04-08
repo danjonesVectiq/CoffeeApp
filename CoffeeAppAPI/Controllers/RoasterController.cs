@@ -22,14 +22,14 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Roaster>>> GetAllRoasters()
         {
-            var roasters = await _roasterRepository.GetAllRoastersAsync();
+            var roasters = await _roasterRepository.GetAllAsync();
             return Ok(roasters);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Roaster>> GetRoaster(Guid id)
         {
-            var roaster = await _roasterRepository.GetRoasterAsync(id);
+            var roaster = await _roasterRepository.GetAsync(id);
 
             if (roaster == null)
             {
@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             roaster.id = Guid.NewGuid();
-            await _roasterRepository.CreateRoasterAsync(roaster);
+            await _roasterRepository.CreateAsync(roaster);
             return CreatedAtAction(nameof(GetRoaster), new { id = roaster.id }, roaster);
         }
 
@@ -60,28 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingRoaster = await _roasterRepository.GetRoasterAsync(id);
+            var existingRoaster = await _roasterRepository.GetAsync(id);
 
             if (existingRoaster == null)
             {
                 return NotFound();
             }
 
-            await _roasterRepository.UpdateRoasterAsync(roaster);
+            await _roasterRepository.UpdateAsync(roaster);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteRoaster(Guid id)
         {
-            var existingRoaster = await _roasterRepository.GetRoasterAsync(id);
+            var existingRoaster = await _roasterRepository.GetAsync(id);
 
             if (existingRoaster == null)
             {
                 return NotFound();
             }
 
-            await _roasterRepository.DeleteRoasterAsync(id);
+            await _roasterRepository.DeleteAsync(id);
             return NoContent();
         }
     }

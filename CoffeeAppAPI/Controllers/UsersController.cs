@@ -20,7 +20,7 @@ namespace CoffeeAppAPI.Controllers
             _userRepository = new UserRepository(cosmosDbService);
         }
 
-          [HttpPost("{userId}/upload-image")]
+        [HttpPost("{userId}/upload-image")]
         public async Task<IActionResult> UploadUserPicture(Guid userId, [FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -34,7 +34,7 @@ namespace CoffeeAppAPI.Controllers
 
             string contentType = file.ContentType;
 
-        
+
 
             // Create the blob name using coffeeId and a timestamp (or a GUID).
             string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
@@ -42,9 +42,9 @@ namespace CoffeeAppAPI.Controllers
             string blobName = $"{userId}/{timestamp}{fileExtension}";
 
             var imageUrl = await _blobStorageRepository.UploadImageAsync(blobName, contentType, stream);
-            User user = _userRepository.GetUserAsync(userId).Result;
+            User user = _userRepository.GetAsync(userId).Result;
             user.ImageUrl = imageUrl;
-            await _userRepository.UpdateUserAsync(user);
+            await _userRepository.UpdateAsync(user);
 
             return Ok(new { ImageUrl = imageUrl });
         }
@@ -66,14 +66,14 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
         {
-            var users = await _userRepository.GetAllUsersAsync();
+            var users = await _userRepository.GetAllAsync();
             return Ok(users);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(Guid id)
         {
-            var user = await _userRepository.GetUserAsync(id);
+            var user = await _userRepository.GetAsync(id);
 
             if (user == null)
             {
@@ -92,7 +92,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             user.id = Guid.NewGuid();
-            await _userRepository.CreateUserAsync(user);
+            await _userRepository.CreateAsync(user);
             return CreatedAtAction(nameof(GetUser), new { id = user.id }, user);
         }
 
@@ -104,14 +104,14 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingUser = await _userRepository.GetUserAsync(id);
+            var existingUser = await _userRepository.GetAsync(id);
 
             if (existingUser == null)
             {
                 return NotFound();
             }
 
-            await _userRepository.UpdateUserAsync(user);
+            await _userRepository.UpdateAsync(user);
             return NoContent();
         }
     }
