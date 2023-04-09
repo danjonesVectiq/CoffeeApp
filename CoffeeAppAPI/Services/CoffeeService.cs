@@ -13,13 +13,32 @@ namespace CoffeeAppAPI.Services
 
     public class CoffeeService : CosmosDbService<Coffee>, ICoffeeService
     {
-        public CoffeeService(ICosmosDbRepository cosmosDbRepository)
+
+        private readonly IBlobStorageService _blobStorageService;
+        public CoffeeService(ICosmosDbRepository cosmosDbRepository, IBlobStorageService blobStorageService)
             : base(cosmosDbRepository, "Coffee", "/id", "Coffee")
         {
+            _blobStorageService = blobStorageService;
         }
 
-        // Implement any Coffee-specific methods here, if needed
 
-      
+        public async Task DeleteAsync(Coffee coffee)
+        {
+            if (coffee != null && !string.IsNullOrEmpty(coffee.ImageUrl))
+            {
+                await _blobStorageService.DeleteImageAsync(coffee.id, coffee.ImageUrl);
+            }
+            await base.DeleteAsync(coffee.id);
+        }
+        public async Task<string> UploadImageAsync(Guid id, string contentType, Stream imageStream)
+        {
+            // Create the blob name using coffeeId and a timestamp (or a GUID).
+            string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            string fileExtension = Helpers.BlobStorageHelpers.GetFileExtensionFromContentType(contentType);
+            string blobName = $"{id}/{timestamp}{fileExtension}";
+            return await _blobStorageService.UploadImageAsync(blobName, contentType, imageStream);
+        }
+
+
     }
 }

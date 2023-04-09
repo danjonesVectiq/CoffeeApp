@@ -8,8 +8,10 @@ namespace CoffeeAppAPI.Services
 {
     public interface ICoffeeShopService : IService<CoffeeShop>
     {
-       // Task DeleteImageForCoffeeShopAsync(Guid id, string ImageUrl);
+        // Task DeleteImageForCoffeeShopAsync(Guid id, string ImageUrl);
         Task DeleteAsync(CoffeeShop coffeeShop);
+        Task<string> UploadImageAsync(Guid id, string contentType, Stream imageStream);
+
     }
 
     public class CoffeeShopService : CosmosDbService<CoffeeShop>, ICoffeeShopService
@@ -31,6 +33,14 @@ namespace CoffeeAppAPI.Services
             await base.DeleteAsync(coffeeShop.id);
         }
 
+        public async Task<string> UploadImageAsync(Guid id, string contentType, Stream imageStream)
+        {
+            // Create the blob name using coffeeId and a timestamp (or a GUID).
+            string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            string fileExtension = Helpers.BlobStorageHelpers.GetFileExtensionFromContentType(contentType);
+            string blobName = $"{id}/{timestamp}{fileExtension}";
+            return await _blobStorageService.UploadImageAsync(blobName, contentType, imageStream);
+        }
+
     }
 }
- 

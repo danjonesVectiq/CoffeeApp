@@ -49,7 +49,7 @@ namespace CoffeeAppAPI.Services
 
         public async Task<string> UploadImageAsync(Guid userId, string contentType, Stream imageStream)
         {
-                        // Create the blob name using coffeeId and a timestamp (or a GUID).
+            // Create the blob name using coffeeId and a timestamp (or a GUID).
             string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
             string fileExtension = Helpers.BlobStorageHelpers.GetFileExtensionFromContentType(contentType);
             string blobName = $"{userId}/{timestamp}{fileExtension}";
