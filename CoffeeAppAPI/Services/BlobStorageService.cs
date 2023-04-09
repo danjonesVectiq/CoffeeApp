@@ -7,6 +7,7 @@ namespace CoffeeAppAPI.Services
     public interface IBlobStorageService
     {
         Task<string> UploadImageAsync(string blobName, string contentType, Stream imageStream);
+        Task DeleteImageAsync(string blobName);
     }
     public class BlobStorageService : IBlobStorageService
     {
@@ -34,6 +35,14 @@ namespace CoffeeAppAPI.Services
             });
 
             return blobClient.Uri.AbsoluteUri;
+        }
+
+        public async Task DeleteImageAsync(string blobName)
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient(_azureStorageConfig["ContainerName"]);
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            await blobClient.DeleteAsync();
         }
     }
 

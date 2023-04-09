@@ -116,5 +116,18 @@ namespace CoffeeAppAPI.Controllers
             await _userRepository.UpdateAsync(user);
             return NoContent();
         }
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteCoffeeShop(Guid id)
+        {
+            var existingUser = await _userRepository.GetAsync(id);
+
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            await _userRepository.DeleteAsync(existingUser);
+            return NoContent();
+        }
     }
 }

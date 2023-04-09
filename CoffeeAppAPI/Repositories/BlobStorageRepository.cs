@@ -5,18 +5,30 @@ using CoffeeAppAPI.Helpers;
 
 namespace CoffeeAppAPI.Repositories
 {
-    public class BlobStorageRepository
+    public interface IBlobStorageRepository
     {
-        private readonly IBlobStorageService _blobServiceService;
+        Task<string> UploadImageAsync(string blobName, string contentType, Stream imageStream);
+        Task DeleteImageAsync(Guid id, string ImageUrl);
+    }
+    public class BlobStorageRepository : IBlobStorageRepository
+    {
+        private readonly IBlobStorageService _blobStorageService;
         public BlobStorageRepository(IBlobStorageService blobStorageService)
         {
-            _blobServiceService = blobStorageService;
+            _blobStorageService = blobStorageService;
         }
 
         public async Task<string> UploadImageAsync(string blobName, string contentType, Stream imageStream)
         {
             
-            return await _blobServiceService.UploadImageAsync(blobName, contentType, imageStream);
+            return await _blobStorageService.UploadImageAsync(blobName, contentType, imageStream);
+        }
+         public async Task DeleteImageAsync(Guid id, string ImageUrl)
+        {
+            if (ImageUrl.StartsWith("https://coffeeappstorage.blob.core.windows.net/coffeeappcontainer/"))
+            {
+                await _blobStorageService.DeleteImageAsync(id.ToString());
+            }
         }
 
     }

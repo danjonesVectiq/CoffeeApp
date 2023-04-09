@@ -110,7 +110,7 @@ namespace CoffeeAppAPI.Controllers
                 return NotFound();
             }
 
-            await _coffeeShopRepository.DeleteAsync(id);
+            await _coffeeShopRepository.DeleteAsync(existingCoffeeShop);
             return NoContent();
         }
     }

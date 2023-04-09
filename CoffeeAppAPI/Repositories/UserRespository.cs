@@ -9,12 +9,15 @@ namespace CoffeeAppAPI.Repositories
     public interface IUserRepository : IRepository<User>
     {
         Task<UserPreferences> LoadUserPreferences(Guid userId);
+        Task DeleteAsync(User user);
     }
     public class UserRepository : CosmosDbRepository<User>, IUserRepository
     {
-        public UserRepository(ICosmosDbService cosmosDbService)
+        private readonly IBlobStorageRepository _blobStorageRepository;
+        public UserRepository(ICosmosDbService cosmosDbService, IBlobStorageRepository blobStorageRepository)
             : base(cosmosDbService, "User", "/id", "User")
         {
+            _blobStorageRepository = blobStorageRepository;
         }
         public async Task<UserPreferences> LoadUserPreferences(Guid userId)
         {
@@ -32,6 +35,14 @@ namespace CoffeeAppAPI.Repositories
                 return userPreferences;
             }
             return null;
+        }
+         public async Task DeleteAsync(User user)
+        {
+            if (user != null && !string.IsNullOrEmpty(user.ImageUrl))
+            {
+                await _blobStorageRepository.DeleteImageAsync(user.id, user.ImageUrl);
+            }
+            await base.DeleteAsync(user.id);
         }
     }
 }
