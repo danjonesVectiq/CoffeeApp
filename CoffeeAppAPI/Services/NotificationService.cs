@@ -1,54 +1,54 @@
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CoffeeAppAPI.Repositories
+namespace CoffeeAppAPI.Services
 {
-    public class NotificationRepository
+    public class NotificationService
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly ICosmosDbRepository _cosmosDbRepository;
 
-        public NotificationRepository(ICosmosDbService cosmosDbService)
+        public NotificationService(ICosmosDbRepository cosmosDbRepository)
         {
-            _cosmosDbService = cosmosDbService;
+            _cosmosDbRepository = cosmosDbRepository;
         }
 
         public async Task<Container> GetNotificationsContainerAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("User", "/id");
+            return await _cosmosDbRepository.GetOrCreateContainerAsync("User", "/id");
         }
 
         public async Task<IEnumerable<Notification>> GetAllNotificationsAsync()
         {
             var notificationsContainer = await GetNotificationsContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Notification>(notificationsContainer, "Notification");
+            return await _cosmosDbRepository.GetAllItemsAsync<Notification>(notificationsContainer, "Notification");
         }
 
         public async Task<Notification> GetNotificationAsync(Guid id)
         {
             var notificationsContainer = await GetNotificationsContainerAsync();
-            return await _cosmosDbService.GetItemAsync<Notification>(notificationsContainer, id.ToString());
+            return await _cosmosDbRepository.GetItemAsync<Notification>(notificationsContainer, id.ToString());
         }
 
         public async Task CreateNotificationAsync(Notification notification)
         {
             var notificationsContainer = await GetNotificationsContainerAsync();
-            await _cosmosDbService.AddItemAsync(notificationsContainer, notification);
+            await _cosmosDbRepository.AddItemAsync(notificationsContainer, notification);
         }
 
         public async Task UpdateNotificationAsync(Notification notification)
         {
             var notificationsContainer = await GetNotificationsContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(notificationsContainer, notification.id.ToString(), notification);
+            await _cosmosDbRepository.UpdateItemAsync(notificationsContainer, notification.id.ToString(), notification);
         }
 
         public async Task DeleteNotificationAsync(Guid id)
         {
             var notificationsContainer = await GetNotificationsContainerAsync();
-            await _cosmosDbService.DeleteItemAsync<Notification>(notificationsContainer, id.ToString());
+            await _cosmosDbRepository.DeleteItemAsync<Notification>(notificationsContainer, id.ToString());
         }
     }
 }

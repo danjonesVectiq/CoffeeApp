@@ -1,54 +1,54 @@
 /* using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CoffeeAppAPI.Repositories
+namespace CoffeeAppAPI.Services
 {
-    public class FriendRequestRepository
+    public class FriendRequestService
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly ICosmosDbRepository _cosmosDbRepository;
 
-        public FriendRequestRepository(ICosmosDbService cosmosDbService)
+        public FriendRequestService(ICosmosDbRepository cosmosDbRepository)
         {
-            _cosmosDbService = cosmosDbService;
+            _cosmosDbRepository = cosmosDbRepository;
         }
 
         public async Task<Container> GetFriendRequestsContainerAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/id");
+            return await _cosmosDbRepository.GetOrCreateContainerAsync("FriendRequests", "/id");
         }
 
         public async Task<IEnumerable<FriendRequest>> GetAllFriendRequestsAsync()
         {
             var friendRequestsContainer = await GetFriendRequestsContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<FriendRequest>(friendRequestsContainer);
+            return await _cosmosDbRepository.GetAllItemsAsync<FriendRequest>(friendRequestsContainer);
         }
 
         public async Task<FriendRequest> GetFriendRequestAsync(Guid id)
         {
             var friendRequestsContainer = await GetFriendRequestsContainerAsync();
-            return await _cosmosDbService.GetItemAsync<FriendRequest>(friendRequestsContainer, id.ToString());
+            return await _cosmosDbRepository.GetItemAsync<FriendRequest>(friendRequestsContainer, id.ToString());
         }
 
         public async Task CreateFriendRequestAsync(FriendRequest friendRequest)
         {
             var friendRequestsContainer = await GetFriendRequestsContainerAsync();
-            await _cosmosDbService.AddItemAsync(friendRequestsContainer, friendRequest);
+            await _cosmosDbRepository.AddItemAsync(friendRequestsContainer, friendRequest);
         }
 
         public async Task UpdateFriendRequestAsync(FriendRequest friendRequest)
         {
             var friendRequestsContainer = await GetFriendRequestsContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(friendRequestsContainer, friendRequest.id.ToString(), friendRequest);
+            await _cosmosDbRepository.UpdateItemAsync(friendRequestsContainer, friendRequest.id.ToString(), friendRequest);
         }
 
         public async Task DeleteFriendRequestAsync(Guid id)
         {
             var friendRequestsContainer = await GetFriendRequestsContainerAsync();
-            await _cosmosDbService.DeleteItemAsync<FriendRequest>(friendRequestsContainer, id.ToString());
+            await _cosmosDbRepository.DeleteItemAsync<FriendRequest>(friendRequestsContainer, id.ToString());
         }
     }
 }

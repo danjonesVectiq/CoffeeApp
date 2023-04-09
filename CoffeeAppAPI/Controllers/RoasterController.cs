@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -12,24 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class RoastersController : ControllerBase
     {
-        private readonly RoasterRepository _roasterRepository;
+        private readonly RoasterService _roasterService;
 
-        public RoastersController(ICosmosDbService cosmosDbService)
+        public RoastersController(ICosmosDbRepository cosmosDbRepository)
         {
-            _roasterRepository = new RoasterRepository(cosmosDbService);
+            _roasterService = new RoasterService(cosmosDbRepository);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Roaster>>> GetAllRoasters()
         {
-            var roasters = await _roasterRepository.GetAllAsync();
+            var roasters = await _roasterService.GetAllAsync();
             return Ok(roasters);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Roaster>> GetRoaster(Guid id)
         {
-            var roaster = await _roasterRepository.GetAsync(id);
+            var roaster = await _roasterService.GetAsync(id);
 
             if (roaster == null)
             {
@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             roaster.id = Guid.NewGuid();
-            await _roasterRepository.CreateAsync(roaster);
+            await _roasterService.CreateAsync(roaster);
             return CreatedAtAction(nameof(GetRoaster), new { id = roaster.id }, roaster);
         }
 
@@ -60,28 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingRoaster = await _roasterRepository.GetAsync(id);
+            var existingRoaster = await _roasterService.GetAsync(id);
 
             if (existingRoaster == null)
             {
                 return NotFound();
             }
 
-            await _roasterRepository.UpdateAsync(roaster);
+            await _roasterService.UpdateAsync(roaster);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteRoaster(Guid id)
         {
-            var existingRoaster = await _roasterRepository.GetAsync(id);
+            var existingRoaster = await _roasterService.GetAsync(id);
 
             if (existingRoaster == null)
             {
                 return NotFound();
             }
 
-            await _roasterRepository.DeleteAsync(id);
+            await _roasterService.DeleteAsync(id);
             return NoContent();
         }
     }

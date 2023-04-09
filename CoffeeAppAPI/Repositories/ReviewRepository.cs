@@ -5,17 +5,17 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using CoffeeAppAPI.Models;
 
-namespace CoffeeAppAPI.Services
+namespace CoffeeAppAPI.Repositories
 {
-    public interface IReviewService : ICosmosDbService
+    public interface IReviewRepository : ICosmosDbRepository
     {
         Task<IEnumerable<Review>> GetReviewsByUserIdAsync(Guid userId);
         
     }
 
-    public class ReviewService : CosmosDbService, IReviewService
+    public class ReviewRepository : CosmosDbRepository, IReviewRepository
     {
-        public ReviewService(IConfiguration configuration) : base(configuration)
+        public ReviewRepository(IConfiguration configuration) : base(configuration)
         {
         }
 

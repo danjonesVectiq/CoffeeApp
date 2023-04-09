@@ -10,9 +10,9 @@ using Microsoft.OpenApi.Services;
 using System;
 using System.Threading.Tasks;
 
-namespace CoffeeAppAPI.Services
+namespace CoffeeAppAPI.Repositories
 {
-    public class IndexManagementService
+    public class IndexManagementRepository
     {
         private readonly SearchIndexClient _searchIndexClient;
         private readonly SearchIndexerClient _searchIndexerClient;
@@ -20,12 +20,12 @@ namespace CoffeeAppAPI.Services
         Uri serviceEndpoint;
         AzureKeyCredential adminCredentials;
         string connectionString = "";
-        public IndexManagementService(IConfiguration configuration)
+        public IndexManagementRepository(IConfiguration configuration)
         {
             azureConfig = configuration.GetSection("AzureCognitiveSearch");
             var cosmosDbConfig = configuration.GetSection("CosmosDb");
             connectionString = cosmosDbConfig["ConnectionString"] + "Database=CoffeeApp";
-            serviceEndpoint = new Uri($"https://{azureConfig["SearchServiceName"]}.search.windows.net");
+            serviceEndpoint = new Uri($"https://{azureConfig["SearchRepositoryName"]}.search.windows.net");
             adminCredentials = new AzureKeyCredential(azureConfig["AdminApiKey"]);
             _searchIndexClient = new SearchIndexClient(serviceEndpoint, adminCredentials);
             _searchIndexerClient = new SearchIndexerClient(serviceEndpoint, adminCredentials);

@@ -1,8 +1,8 @@
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using CoffeeAppAPI.Data;
-using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 var  AllowAll = "_AllowAll";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,19 +19,20 @@ builder.Services.AddCors(options =>
                           });
    
 });
-// Add this line to register CosmosDbService
-builder.Services.AddSingleton<SearchService>();
-builder.Services.AddSingleton<IndexManagementService>();
+
+builder.Services.AddSingleton<SearchRepository>();
+builder.Services.AddSingleton<IndexManagementRepository>();
 builder.Services.AddSingleton<DataSeeder>();
-builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
-builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
-builder.Services.AddScoped<ISearchRepository, SearchRepository>(); 
-builder.Services.AddScoped<ICoffeeRepository, CoffeeRepository>();
-builder.Services.AddScoped<ICoffeeShopRepository, CoffeeShopRepository>();
-builder.Services.AddScoped<IRoasterRepository, RoasterRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
-builder.Services.AddScoped<ICheckInRepository, CheckInRepository>();
+builder.Services.AddSingleton<ICosmosDbRepository, CosmosDbRepository>();
+builder.Services.AddSingleton<IBlobStorageRepository, BlobStorageRepository>();
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<ISearchService, SearchService>(); 
+builder.Services.AddScoped<ICoffeeService, CoffeeService>();
+builder.Services.AddScoped<ICoffeeShopService, CoffeeShopService>();
+builder.Services.AddScoped<IRoasterService, RoasterService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<ICheckInService, CheckInService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

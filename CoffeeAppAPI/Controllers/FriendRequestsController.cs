@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -12,24 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class FriendRequestsController : ControllerBase
     {
-        private readonly FriendRequestRepository _friendRequestRepository;
+        private readonly FriendRequestService _friendRequestService;
 
-        public FriendRequestsController(ICosmosDbService cosmosDbService)
+        public FriendRequestsController(ICosmosDbRepository cosmosDbRepository)
         {
-            _friendRequestRepository = new FriendRequestRepository(cosmosDbService);
+            _friendRequestService = new FriendRequestService(cosmosDbRepository);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FriendRequest>>> GetAllFriendRequests()
         {
-            var friendRequests = await _friendRequestRepository.GetAllFriendRequestsAsync();
+            var friendRequests = await _friendRequestService.GetAllFriendRequestsAsync();
             return Ok(friendRequests);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<FriendRequest>> GetFriendRequest(Guid id)
         {
-            var friendRequest = await _friendRequestRepository.GetFriendRequestAsync(id);
+            var friendRequest = await _friendRequestService.GetFriendRequestAsync(id);
 
             if (friendRequest == null)
             {
@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             friendRequest.id = Guid.NewGuid();
-            await _friendRequestRepository.CreateFriendRequestAsync(friendRequest);
+            await _friendRequestService.CreateFriendRequestAsync(friendRequest);
             return CreatedAtAction(nameof(GetFriendRequest), new { id = friendRequest.id }, friendRequest);
         }
 
@@ -60,28 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingFriendRequest = await _friendRequestRepository.GetFriendRequestAsync(id);
+            var existingFriendRequest = await _friendRequestService.GetFriendRequestAsync(id);
 
             if (existingFriendRequest == null)
             {
                 return NotFound();
             }
 
-            await _friendRequestRepository.UpdateFriendRequestAsync(friendRequest);
+            await _friendRequestService.UpdateFriendRequestAsync(friendRequest);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteFriendRequest(Guid id)
         {
-            var existingFriendRequest = await _friendRequestRepository.GetFriendRequestAsync(id);
+            var existingFriendRequest = await _friendRequestService.GetFriendRequestAsync(id);
 
             if (existingFriendRequest == null)
             {
                 return NotFound();
             }
 
-            await _friendRequestRepository.DeleteFriendRequestAsync(id);
+            await _friendRequestService.DeleteFriendRequestAsync(id);
             return NoContent();
         }
     }

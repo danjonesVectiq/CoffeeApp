@@ -1,54 +1,54 @@
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CoffeeAppAPI.Repositories
+namespace CoffeeAppAPI.Services
 {
-    public class CommentRepository
+    public class CommentService
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly ICosmosDbRepository _cosmosDbRepository;
 
-        public CommentRepository(ICosmosDbService cosmosDbService)
+        public CommentService(ICosmosDbRepository cosmosDbRepository)
         {
-            _cosmosDbService = cosmosDbService;
+            _cosmosDbRepository = cosmosDbRepository;
         }
 
         public async Task<Container> GetCommentsContainerAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("Interaction", "/id");
+            return await _cosmosDbRepository.GetOrCreateContainerAsync("Interaction", "/id");
         }
 
         public async Task<IEnumerable<Comment>> GetAllCommentsAsync()
         {
             var commentsContainer = await GetCommentsContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<Comment>(commentsContainer, "Comment");
+            return await _cosmosDbRepository.GetAllItemsAsync<Comment>(commentsContainer, "Comment");
         }
 
         public async Task<Comment> GetCommentAsync(Guid id)
         {
             var commentsContainer = await GetCommentsContainerAsync();
-            return await _cosmosDbService.GetItemAsync<Comment>(commentsContainer, id.ToString());
+            return await _cosmosDbRepository.GetItemAsync<Comment>(commentsContainer, id.ToString());
         }
 
         public async Task CreateCommentAsync(Comment comment)
         {
             var commentsContainer = await GetCommentsContainerAsync();
-            await _cosmosDbService.AddItemAsync(commentsContainer, comment);
+            await _cosmosDbRepository.AddItemAsync(commentsContainer, comment);
         }
 
         public async Task UpdateCommentAsync(Comment comment)
         {
             var commentsContainer = await GetCommentsContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(commentsContainer, comment.id.ToString(), comment);
+            await _cosmosDbRepository.UpdateItemAsync(commentsContainer, comment.id.ToString(), comment);
         }
 
         public async Task DeleteCommentAsync(Guid id)
         {
             var commentsContainer = await GetCommentsContainerAsync();
-            await _cosmosDbService.DeleteItemAsync<Comment>(commentsContainer, id.ToString());
+            await _cosmosDbRepository.DeleteItemAsync<Comment>(commentsContainer, id.ToString());
         }
     }
 }

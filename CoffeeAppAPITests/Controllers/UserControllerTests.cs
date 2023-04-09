@@ -1,6 +1,6 @@
 /* using CoffeeAppAPI.Controllers;
 using CoffeeAppAPIModels = CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 using Moq;
@@ -16,24 +16,24 @@ namespace CoffeeAppAPITests.Controllers
     public class UserControllerTests
     {
         private readonly UsersController _controller;
-        private readonly Mock<ICosmosDbService> _cosmosDbServiceMock;
+        private readonly Mock<ICosmosDbRepository> _cosmosDbRepositoryMock;
         private readonly Container _mockContainer;
 
         public UserControllerTests()
         {
-            _cosmosDbServiceMock = new Mock<ICosmosDbService>();
+            _cosmosDbRepositoryMock = new Mock<ICosmosDbRepository>();
             _mockContainer = new Mock<Container>().Object; // Create a mocked Container object
 
             // Set up the mock method after initializing the mock object
-            _cosmosDbServiceMock.Setup(s => s.GetOrCreateContainerAsync("User", "/id")).ReturnsAsync(_mockContainer);
+            _cosmosDbRepositoryMock.Setup(s => s.GetOrCreateContainerAsync("User", "/id")).ReturnsAsync(_mockContainer);
 
-            _controller = new UsersController(_cosmosDbServiceMock.Object);
+            _controller = new UsersController(_cosmosDbRepositoryMock.Object);
         }
         [Fact]
         public async Task GetUser_ReturnsNotFound_WhenUserDoesNotExist()
         {
             // Arrange
-            _cosmosDbServiceMock.Setup(s => s.GetItemAsync<CoffeeAppAPIModels.User>(_mockContainer, It.IsAny<string>())).ReturnsAsync((CoffeeAppAPIModels.User)null);
+            _cosmosDbRepositoryMock.Setup(s => s.GetItemAsync<CoffeeAppAPIModels.User>(_mockContainer, It.IsAny<string>())).ReturnsAsync((CoffeeAppAPIModels.User)null);
 
 
             // Act
@@ -66,7 +66,7 @@ namespace CoffeeAppAPITests.Controllers
                 //Friends = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
             };
 
-            _cosmosDbServiceMock.Setup(s => s.GetItemAsync<CoffeeAppAPIModels.User>(_mockContainer, userId.ToString())).ReturnsAsync(user);
+            _cosmosDbRepositoryMock.Setup(s => s.GetItemAsync<CoffeeAppAPIModels.User>(_mockContainer, userId.ToString())).ReturnsAsync(user);
 
             // Act
             var result = await _controller.GetUser(userId);
@@ -115,7 +115,7 @@ namespace CoffeeAppAPITests.Controllers
                 //Friends = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
             };
 
-            _cosmosDbServiceMock.Setup(s => s.AddItemAsync(_mockContainer, user)).Returns(Task.CompletedTask);
+            _cosmosDbRepositoryMock.Setup(s => s.AddItemAsync(_mockContainer, user)).Returns(Task.CompletedTask);
 
             // Act
             var result = await _controller.CreateUser(user);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -11,24 +11,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class RecipesController : ControllerBase
     {
-        private readonly IRecipeRepository _recipeRepository;
+        private readonly IRecipeService _recipeService;
 
-        public RecipesController(IRecipeRepository recipeRepository)
+        public RecipesController(IRecipeService recipeService)
         {
-            _recipeRepository = recipeRepository;
+            _recipeService = recipeService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Recipe>>> GetAllRecipes()
         {
-            var recipes = await _recipeRepository.GetAllAsync();
+            var recipes = await _recipeService.GetAllAsync();
             return Ok(recipes);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Recipe>> GetRecipe(Guid id)
         {
-            var recipe = await _recipeRepository.GetAsync(id);
+            var recipe = await _recipeService.GetAsync(id);
 
             if (recipe == null)
             {
@@ -41,7 +41,7 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet("coffee/{coffeeId}")]
         public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipesByCoffeeId(Guid coffeeId)
         {
-            var recipes = await _recipeRepository.GetRecipesByCoffeeIdAsync(coffeeId);
+            var recipes = await _recipeService.GetRecipesByCoffeeIdAsync(coffeeId);
             return Ok(recipes);
         }
 
@@ -54,7 +54,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             recipe.id = Guid.NewGuid();
-            await _recipeRepository.CreateAsync(recipe);
+            await _recipeService.CreateAsync(recipe);
             return CreatedAtAction(nameof(GetRecipe), new { id = recipe.id }, recipe);
         }
 
@@ -66,28 +66,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingRecipe = await _recipeRepository.GetAsync(id);
+            var existingRecipe = await _recipeService.GetAsync(id);
 
             if (existingRecipe == null)
             {
                 return NotFound();
             }
 
-            await _recipeRepository.UpdateAsync(recipe);
+            await _recipeService.UpdateAsync(recipe);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteRecipe(Guid id)
         {
-            var existingRecipe = await _recipeRepository.GetAsync(id);
+            var existingRecipe = await _recipeService.GetAsync(id);
 
             if (existingRecipe == null)
             {
                 return NotFound();
             }
 
-            await _recipeRepository.DeleteAsync(id);
+            await _recipeService.DeleteAsync(id);
             return NoContent();
         }
     }

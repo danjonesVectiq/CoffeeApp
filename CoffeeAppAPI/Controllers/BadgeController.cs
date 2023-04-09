@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -12,24 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class BadgesController : ControllerBase
     {
-        private readonly IBadgeRepository _badgeRepository;
+        private readonly IBadgeService _badgeService;
 
-        public BadgesController(IBadgeRepository badgeRepository)
+        public BadgesController(IBadgeService badgeService)
         {
-            _badgeRepository = badgeRepository;
+            _badgeService = badgeService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Badge>>> GetAllBadges()
         {
-            var badges = await _badgeRepository.GetAllAsync();
+            var badges = await _badgeService.GetAllAsync();
             return Ok(badges);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Badge>> GetBadge(Guid id)
         {
-            var badge = await _badgeRepository.GetAsync(id);
+            var badge = await _badgeService.GetAsync(id);
 
             if (badge == null)
             {
@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             badge.id = Guid.NewGuid();
-            await _badgeRepository.CreateAsync(badge);
+            await _badgeService.CreateAsync(badge);
             return CreatedAtAction(nameof(GetBadge), new { id = badge.id }, badge);
         }
 
@@ -60,28 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingBadge = await _badgeRepository.GetAsync(id);
+            var existingBadge = await _badgeService.GetAsync(id);
 
             if (existingBadge == null)
             {
                 return NotFound();
             }
 
-            await _badgeRepository.UpdateAsync(badge);
+            await _badgeService.UpdateAsync(badge);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteBadge(Guid id)
         {
-            var existingBadge = await _badgeRepository.GetAsync(id);
+            var existingBadge = await _badgeService.GetAsync(id);
 
             if (existingBadge == null)
             {
                 return NotFound();
             }
 
-            await _badgeRepository.DeleteAsync(id);
+            await _badgeService.DeleteAsync(id);
             return NoContent();
         }
     }

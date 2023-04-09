@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -12,24 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class NotificationsController : ControllerBase
     {
-        private readonly NotificationRepository _notificationRepository;
+        private readonly NotificationService _notificationService;
 
-        public NotificationsController(ICosmosDbService cosmosDbService)
+        public NotificationsController(ICosmosDbRepository cosmosDbRepository)
         {
-            _notificationRepository = new NotificationRepository(cosmosDbService);
+            _notificationService = new NotificationService(cosmosDbRepository);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Notification>>> GetAllNotifications()
         {
-            var notifications = await _notificationRepository.GetAllNotificationsAsync();
+            var notifications = await _notificationService.GetAllNotificationsAsync();
             return Ok(notifications);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Notification>> GetNotification(Guid id)
         {
-            var notification = await _notificationRepository.GetNotificationAsync(id);
+            var notification = await _notificationService.GetNotificationAsync(id);
 
             if (notification == null)
             {
@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             notification.id = Guid.NewGuid();
-            await _notificationRepository.CreateNotificationAsync(notification);
+            await _notificationService.CreateNotificationAsync(notification);
             return CreatedAtAction(nameof(GetNotification), new { id = notification.id }, notification);
         }
 
@@ -60,28 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingNotification = await _notificationRepository.GetNotificationAsync(id);
+            var existingNotification = await _notificationService.GetNotificationAsync(id);
 
             if (existingNotification == null)
             {
                 return NotFound();
             }
 
-            await _notificationRepository.UpdateNotificationAsync(notification);
+            await _notificationService.UpdateNotificationAsync(notification);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteNotification(Guid id)
         {
-            var existingNotification = await _notificationRepository.GetNotificationAsync(id);
+            var existingNotification = await _notificationService.GetNotificationAsync(id);
 
             if (existingNotification == null)
             {
                 return NotFound();
             }
 
-            await _notificationRepository.DeleteNotificationAsync(id);
+            await _notificationService.DeleteNotificationAsync(id);
             return NoContent();
         }
     }

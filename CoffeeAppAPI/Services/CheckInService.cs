@@ -1,24 +1,24 @@
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CoffeeAppAPI.Repositories
+namespace CoffeeAppAPI.Services
 {
-    public interface ICheckInRepository : IRepository<CheckIn>
+    public interface ICheckInService : IService<CheckIn>
     {
         Task<IEnumerable<CheckIn>> GetUserCheckInsAsync(Guid userId);
         Task<IEnumerable<CheckIn>> GetCoffeeShopCheckInsAsync(Guid coffeeShopId);
     }
 
 
-    public class CheckInRepository : CosmosDbRepository<CheckIn>, ICheckInRepository
+    public class CheckInService : CosmosDbService<CheckIn>, ICheckInService
     {
-        public CheckInRepository(ICosmosDbService cosmosDbService)
-            : base(cosmosDbService, "Interaction", "/id", "CheckIn")
+        public CheckInService(ICosmosDbRepository cosmosDbRepository)
+            : base(cosmosDbRepository, "Interaction", "/id", "CheckIn")
         {
         }
 

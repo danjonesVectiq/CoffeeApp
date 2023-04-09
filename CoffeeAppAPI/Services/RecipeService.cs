@@ -1,22 +1,22 @@
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CoffeeAppAPI.Repositories
+namespace CoffeeAppAPI.Services
 {
-    public interface IRecipeRepository : IRepository<Recipe>
+    public interface IRecipeService : IService<Recipe>
     {
         Task<IEnumerable<Recipe>> GetRecipesByCoffeeIdAsync(Guid coffeeId);
     }
 
-    public class RecipeRepository : CosmosDbRepository<Recipe>, IRecipeRepository
+    public class RecipeService : CosmosDbService<Recipe>, IRecipeService
     {
-        public RecipeRepository(ICosmosDbService cosmosDbService)
-            : base(cosmosDbService, "Coffee", "/id", "Recipe")
+        public RecipeService(ICosmosDbRepository cosmosDbRepository)
+            : base(cosmosDbRepository, "Coffee", "/id", "Recipe")
         {
         }
 

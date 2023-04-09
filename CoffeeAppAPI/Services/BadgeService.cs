@@ -1,19 +1,19 @@
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CoffeeAppAPI.Repositories
+namespace CoffeeAppAPI.Services
 {
-    public interface IBadgeRepository : IRepository<Badge>
+    public interface IBadgeService : IService<Badge>
     {
     }
 
-    public class BadgeRepository : CosmosDbRepository<Badge>, IBadgeRepository
+    public class BadgeService : CosmosDbService<Badge>, IBadgeService
     {
-        public BadgeRepository(ICosmosDbService cosmosDbService)
-            : base(cosmosDbService, "User", "/id", "Badge")
+        public BadgeService(ICosmosDbRepository cosmosDbRepository)
+            : base(cosmosDbRepository, "User", "/id", "Badge")
         {
         }
 

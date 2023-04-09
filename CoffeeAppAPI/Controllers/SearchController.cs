@@ -1,4 +1,4 @@
-using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -9,15 +9,15 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class SearchController : ControllerBase
     {
-        private readonly ISearchRepository _searchRepository;
-        public SearchController(ISearchRepository searchRepository)
+        private readonly ISearchService _searchService;
+        public SearchController(ISearchService searchService)
         {
-            _searchRepository = searchRepository;
+            _searchService = searchService;
         }
         [HttpGet("coffees")]
         public async Task<IActionResult> SearchCoffees([FromQuery] string query, int topResults = 10)
         {
-            var results = await _searchRepository.SearchCoffeesAsync(query, topResults);
+            var results = await _searchService.SearchCoffeesAsync(query, topResults);
             return Ok(new
             {
                 totalCount = results.TotalCount,
@@ -27,7 +27,7 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet("coffeeshops")]
         public async Task<IActionResult> SearchCoffeeShops(string query, int topResults = 10)
         {
-            var results = await _searchRepository.SearchCoffeeShopsAsync(query, topResults);
+            var results = await _searchService.SearchCoffeeShopsAsync(query, topResults);
             return Ok(new
             {
                 totalCount = results.TotalCount,
@@ -42,7 +42,7 @@ namespace CoffeeAppAPI.Controllers
         [FromQuery] int topResults = 10)
         {
             
-                var results = await _searchRepository.SearchCoffeeShopsNearbyAsync(latitude, longitude, radius, topResults);
+                var results = await _searchService.SearchCoffeeShopsNearbyAsync(latitude, longitude, radius, topResults);
                 return Ok(new
                 {
                     totalCount = results.TotalCount,
@@ -54,7 +54,7 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet("roasters")]
         public async Task<IActionResult> SearchRoasters(string query, int topResults = 10)
         {
-            var results = await _searchRepository.SearchRoastersAsync(query, topResults);
+            var results = await _searchService.SearchRoastersAsync(query, topResults);
             return Ok(new
             {
                 totalCount = results.TotalCount,
@@ -64,7 +64,7 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> SearchAll(string query, int topResults = 10)
         {
-            var results = await _searchRepository.SearchAllAsync(query, topResults);
+            var results = await _searchService.SearchAllAsync(query, topResults);
             return Ok(results);
         }
     }

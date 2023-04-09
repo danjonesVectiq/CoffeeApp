@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -12,17 +12,17 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CheckInsController : ControllerBase
     {
-        private readonly ICheckInRepository _checkInRepository;
+        private readonly ICheckInService _checkInService;
 
-        public CheckInsController(ICheckInRepository checkInRepository)
+        public CheckInsController(ICheckInService checkInService)
         {
-            _checkInRepository = checkInRepository;
+            _checkInService = checkInService;
         }
       
       [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<CheckIn>>> GetUserCheckInHistory(Guid userId)
         {
-            var checkIns = await _checkInRepository.GetUserCheckInsAsync(userId);
+            var checkIns = await _checkInService.GetUserCheckInsAsync(userId);
 
             if (checkIns == null)
             {
@@ -35,7 +35,7 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet("coffeeshop/{coffeeShopId}")]
         public async Task<ActionResult<IEnumerable<CheckIn>>> GetCoffeeShopCheckIns(Guid coffeeShopId)
         {
-            var checkIns = await _checkInRepository.GetCoffeeShopCheckInsAsync(coffeeShopId);
+            var checkIns = await _checkInService.GetCoffeeShopCheckInsAsync(coffeeShopId);
 
             if (checkIns == null)
             {
@@ -48,14 +48,14 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CheckIn>>> GetAllCheckIns()
         {
-            var checkIns = await _checkInRepository.GetAllAsync();
+            var checkIns = await _checkInService.GetAllAsync();
             return Ok(checkIns);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CheckIn>> GetCheckIn(Guid id)
         {
-            var checkIn = await _checkInRepository.GetAsync(id);
+            var checkIn = await _checkInService.GetAsync(id);
 
             if (checkIn == null)
             {
@@ -74,7 +74,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             checkIn.id = Guid.NewGuid();
-            await _checkInRepository.CreateAsync(checkIn);
+            await _checkInService.CreateAsync(checkIn);
             return CreatedAtAction(nameof(GetCheckIn), new { id = checkIn.id }, checkIn);
         }
 
@@ -86,28 +86,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingCheckIn = await _checkInRepository.GetAsync(id);
+            var existingCheckIn = await _checkInService.GetAsync(id);
 
             if (existingCheckIn == null)
             {
                 return NotFound();
             }
 
-            await _checkInRepository.UpdateAsync(checkIn);
+            await _checkInService.UpdateAsync(checkIn);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCheckIn(Guid id)
         {
-            var existingCheckIn = await _checkInRepository.GetAsync(id);
+            var existingCheckIn = await _checkInService.GetAsync(id);
 
             if (existingCheckIn == null)
             {
                 return NotFound();
             }
 
-            await _checkInRepository.DeleteAsync(id);
+            await _checkInService.DeleteAsync(id);
             return NoContent();
         }
     }

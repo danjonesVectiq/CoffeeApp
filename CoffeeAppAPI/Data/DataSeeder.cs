@@ -2,7 +2,7 @@ using Bogus;
 using CoffeeAppAPI.Models;
 using Microsoft.Azure.Cosmos;
 using System.Threading.Tasks;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Spatial;
@@ -13,7 +13,7 @@ namespace CoffeeAppAPI.Data
 {
     public class DataSeeder
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly ICosmosDbRepository _cosmosDbRepository;
         private readonly Container _coffeeContainer;
         private readonly Container _userContainer;
         private readonly Container _interactionContainer;
@@ -32,12 +32,12 @@ namespace CoffeeAppAPI.Data
         };
         private readonly List<string> brewingMethods = new List<string> { "Pour Over", "French Press", "Aeropress", "Espresso Machine", "Cold Brew" };
 
-        public DataSeeder(ICosmosDbService cosmosDbService)
+        public DataSeeder(ICosmosDbRepository cosmosDbRepository)
         {
-            _cosmosDbService = cosmosDbService;
-            _userContainer = cosmosDbService.GetOrCreateContainerAsync("User", "/id").Result;
-            _coffeeContainer = cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id").Result;
-            _interactionContainer = cosmosDbService.GetOrCreateContainerAsync("Interaction", "/id").Result;
+            _cosmosDbRepository = cosmosDbRepository;
+            _userContainer = cosmosDbRepository.GetOrCreateContainerAsync("User", "/id").Result;
+            _coffeeContainer = cosmosDbRepository.GetOrCreateContainerAsync("Coffee", "/id").Result;
+            _interactionContainer = cosmosDbRepository.GetOrCreateContainerAsync("Interaction", "/id").Result;
         }
         public async Task SeedData()
         {
@@ -371,125 +371,125 @@ namespace CoffeeAppAPI.Data
 
         private async Task SeedUsers(List<CoffeeAppAPI.Models.User> users)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("User", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("User", "/id").Result;
             foreach (var user in users)
             {
-                await _cosmosDbService.AddItemAsync(container, user);
+                await _cosmosDbRepository.AddItemAsync(container, user);
             }
         }
         private async Task SeedBadges(List<Badge> badges)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("User", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("User", "/id").Result;
             foreach (var badge in badges)
             {
-                await _cosmosDbService.AddItemAsync(container, badge);
+                await _cosmosDbRepository.AddItemAsync(container, badge);
             }
         }
 
         private async Task SeedNotifications(List<Notification> notifications)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("User", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("User", "/id").Result;
             foreach (var notification in notifications)
             {
-                await _cosmosDbService.AddItemAsync(container, notification);
+                await _cosmosDbRepository.AddItemAsync(container, notification);
             }
         }
         private async Task SeedRoasters(List<Roaster> roasters)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("Coffee", "/id").Result;
             foreach (var roaster in roasters)
             {
-                await _cosmosDbService.AddItemAsync(container, roaster);
+                await _cosmosDbRepository.AddItemAsync(container, roaster);
             }
         }
         private async Task SeedCoffees(List<Coffee> coffees)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("Coffee", "/id").Result;
             foreach (var coffee in coffees)
             {
-                await _cosmosDbService.AddItemAsync(container, coffee);
+                await _cosmosDbRepository.AddItemAsync(container, coffee);
             }
         }
 
         private async Task SeedCoffeeShops(List<CoffeeShop> coffeeShops)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("Coffee", "/id").Result;
             foreach (var coffeeShop in coffeeShops)
             {
-                await _cosmosDbService.AddItemAsync(container, coffeeShop);
+                await _cosmosDbRepository.AddItemAsync(container, coffeeShop);
             }
         }
 
          private async Task SeedRecipes(List<Recipe> recipes)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("Coffee", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("Coffee", "/id").Result;
             foreach (var recipe in recipes)
             {
-                await _cosmosDbService.AddItemAsync(container, recipe);
+                await _cosmosDbRepository.AddItemAsync(container, recipe);
             }
         }
 
         private async Task SeedCheckins(List<CheckIn> checkins)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("Interaction", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("Interaction", "/id").Result;
             foreach (var checkin in checkins)
             {
-                await _cosmosDbService.AddItemAsync(container, checkin);
+                await _cosmosDbRepository.AddItemAsync(container, checkin);
             }
         }
 
         private async Task SeedReviews(List<Review> reviews)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("Interaction", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("Interaction", "/id").Result;
             foreach (var review in reviews)
             {
-                await _cosmosDbService.AddItemAsync(container, review);
+                await _cosmosDbRepository.AddItemAsync(container, review);
             }
         }
 
         private async Task SeedComments(List<Comment> comments)
         {
-            var container = _cosmosDbService.GetOrCreateContainerAsync("Interaction", "/id").Result;
+            var container = _cosmosDbRepository.GetOrCreateContainerAsync("Interaction", "/id").Result;
             foreach (var comment in comments)
             {
-                await _cosmosDbService.AddItemAsync(container, comment);
+                await _cosmosDbRepository.AddItemAsync(container, comment);
             }
         }
 
         /* 
                private async Task SeedFriendRequests(List<FriendRequest> friendRequests)
                {
-                   var container = _cosmosDbService.GetOrCreateContainerAsync("FriendRequests", "/id").Result;
+                   var container = _cosmosDbRepository.GetOrCreateContainerAsync("FriendRequests", "/id").Result;
                    foreach (var friendRequest in friendRequests)
                    {
-                       await _cosmosDbService.AddItemAsync(container, friendRequest);
+                       await _cosmosDbRepository.AddItemAsync(container, friendRequest);
                    }
                } */
 
 
         /*  private async Task SeedUserFollowings(List<UserFollowing> userFollowings)
          {
-             var container = _cosmosDbService.GetOrCreateContainerAsync("UserFollowings", "/id").Result;
+             var container = _cosmosDbRepository.GetOrCreateContainerAsync("UserFollowings", "/id").Result;
              foreach (var userFollowing in userFollowings)
              {
-                 await _cosmosDbService.AddItemAsync(container, userFollowing);
+                 await _cosmosDbRepository.AddItemAsync(container, userFollowing);
              }
          } */
         /*      private async Task SeedEvents(List<Event> events)
              {
-                 var container = _cosmosDbService.GetOrCreateContainerAsync("Events", "/id").Result;
+                 var container = _cosmosDbRepository.GetOrCreateContainerAsync("Events", "/id").Result;
                  foreach (var eventItem in events)
                  {
-                     await _cosmosDbService.AddItemAsync(container, eventItem);
+                     await _cosmosDbRepository.AddItemAsync(container, eventItem);
                  }
              } */
 
         /*         private async Task SeedUserEvents(List<UserEvent> userEvents)
                 {
-                    var container = _cosmosDbService.GetOrCreateContainerAsync("UserEvents", "/id").Result;
+                    var container = _cosmosDbRepository.GetOrCreateContainerAsync("UserEvents", "/id").Result;
                     foreach (var userEvent in userEvents)
                     {
-                        await _cosmosDbService.AddItemAsync(container, userEvent);
+                        await _cosmosDbRepository.AddItemAsync(container, userEvent);
                     }
                 } */
 
@@ -499,21 +499,21 @@ namespace CoffeeAppAPI.Data
         public async Task CleanUpData()
         {
             // Remove all test data from the development database
-            // await _cosmosDbService.DeleteAllItemsAsync<FriendRequest>(_container);
-            await _cosmosDbService.DeleteAllItemsAsync<Roaster>(_coffeeContainer);
-            await _cosmosDbService.DeleteAllItemsAsync<CheckIn>(_interactionContainer);
-            await _cosmosDbService.DeleteAllItemsAsync<CoffeeShop>(_coffeeContainer);
-            await _cosmosDbService.DeleteAllItemsAsync<CoffeeAppAPI.Models.User>(_userContainer);
-            await _cosmosDbService.DeleteAllItemsAsync<Coffee>(_coffeeContainer);
-            await _cosmosDbService.DeleteAllItemsAsync<Badge>(_userContainer);
-            await _cosmosDbService.DeleteAllItemsAsync<Review>(_interactionContainer);
-            //await _cosmosDbService.DeleteAllItemsAsync<ReviewLike>(_container);
-            await _cosmosDbService.DeleteAllItemsAsync<Comment>(_interactionContainer);
-            // await _cosmosDbService.DeleteAllItemsAsync<UserFollowing>(_container);
-            await _cosmosDbService.DeleteAllItemsAsync<Notification>(_userContainer);
+            // await _cosmosDbRepository.DeleteAllItemsAsync<FriendRequest>(_container);
+            await _cosmosDbRepository.DeleteAllItemsAsync<Roaster>(_coffeeContainer);
+            await _cosmosDbRepository.DeleteAllItemsAsync<CheckIn>(_interactionContainer);
+            await _cosmosDbRepository.DeleteAllItemsAsync<CoffeeShop>(_coffeeContainer);
+            await _cosmosDbRepository.DeleteAllItemsAsync<CoffeeAppAPI.Models.User>(_userContainer);
+            await _cosmosDbRepository.DeleteAllItemsAsync<Coffee>(_coffeeContainer);
+            await _cosmosDbRepository.DeleteAllItemsAsync<Badge>(_userContainer);
+            await _cosmosDbRepository.DeleteAllItemsAsync<Review>(_interactionContainer);
+            //await _cosmosDbRepository.DeleteAllItemsAsync<ReviewLike>(_container);
+            await _cosmosDbRepository.DeleteAllItemsAsync<Comment>(_interactionContainer);
+            // await _cosmosDbRepository.DeleteAllItemsAsync<UserFollowing>(_container);
+            await _cosmosDbRepository.DeleteAllItemsAsync<Notification>(_userContainer);
             /* 
-                        await _cosmosDbService.DeleteAllItemsAsync<Event>(_container);
-                        await _cosmosDbService.DeleteAllItemsAsync<UserEvent>(_container); */
+                        await _cosmosDbRepository.DeleteAllItemsAsync<Event>(_container);
+                        await _cosmosDbRepository.DeleteAllItemsAsync<UserEvent>(_container); */
 
 
 

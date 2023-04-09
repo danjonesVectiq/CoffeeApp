@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -12,13 +12,11 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
-        private readonly BlobStorageRepository _blobStorageRepository;
+        private readonly IUserService _userService;
 
-        public UsersController(IUserRepository userRepository, BlobStorageRepository blobStorageRepository)
+        public UsersController(IUserService userService)
         {
-            _userRepository = userRepository;
-            _blobStorageRepository = blobStorageRepository;
+            _userService = userService;
         }
        
 
@@ -36,17 +34,10 @@ namespace CoffeeAppAPI.Controllers
 
             string contentType = file.ContentType;
 
-
-
-            // Create the blob name using coffeeId and a timestamp (or a GUID).
-            string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            string fileExtension = Helpers.BlobStorageHelpers.GetFileExtensionFromContentType(contentType);
-            string blobName = $"{userId}/{timestamp}{fileExtension}";
-
-            var imageUrl = await _blobStorageRepository.UploadImageAsync(blobName, contentType, stream);
-            User user = _userRepository.GetAsync(userId).Result;
+            var imageUrl = await _userService.UploadImageAsync(userId, contentType, stream);
+            User user = _userService.GetAsync(userId).Result;
             user.ImageUrl = imageUrl;
-            await _userRepository.UpdateAsync(user);
+            await _userService.UpdateAsync(user);
 
             return Ok(new { ImageUrl = imageUrl });
         }
@@ -54,7 +45,7 @@ namespace CoffeeAppAPI.Controllers
         [HttpGet("{id}/preferences")]
         public async Task<ActionResult<UserPreferences>> GetUserPreferences(Guid id)
         {
-            var userPreferences = await _userRepository.LoadUserPreferences(id);
+            var userPreferences = await _userService.LoadUserPreferences(id);
 
             if (userPreferences == null)
             {
@@ -63,19 +54,18 @@ namespace CoffeeAppAPI.Controllers
 
             return Ok(userPreferences);
         }
-
-
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = await _userService.GetAllAsync();
             return Ok(users);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(Guid id)
         {
-            var user = await _userRepository.GetAsync(id);
+            var user = await _userService.GetAsync(id);
 
             if (user == null)
             {
@@ -94,7 +84,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             user.id = Guid.NewGuid();
-            await _userRepository.CreateAsync(user);
+            await _userService.CreateAsync(user);
             return CreatedAtAction(nameof(GetUser), new { id = user.id }, user);
         }
 
@@ -106,27 +96,27 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingUser = await _userRepository.GetAsync(id);
+            var existingUser = await _userService.GetAsync(id);
 
             if (existingUser == null)
             {
                 return NotFound();
             }
 
-            await _userRepository.UpdateAsync(user);
+            await _userService.UpdateAsync(user);
             return NoContent();
         }
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCoffeeShop(Guid id)
         {
-            var existingUser = await _userRepository.GetAsync(id);
+            var existingUser = await _userService.GetAsync(id);
 
             if (existingUser == null)
             {
                 return NotFound();
             }
 
-            await _userRepository.DeleteAsync(existingUser);
+            await _userService.DeleteAsync(existingUser);
             return NoContent();
         }
     }

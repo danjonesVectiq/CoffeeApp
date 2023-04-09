@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -12,24 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class CommentsController : ControllerBase
     {
-        private readonly CommentRepository _commentRepository;
+        private readonly CommentService _commentService;
 
-        public CommentsController(ICosmosDbService cosmosDbService)
+        public CommentsController(ICosmosDbRepository cosmosDbRepository)
         {
-            _commentRepository = new CommentRepository(cosmosDbService);
+            _commentService = new CommentService(cosmosDbRepository);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Comment>>> GetAllComments()
         {
-            var comments = await _commentRepository.GetAllCommentsAsync();
+            var comments = await _commentService.GetAllCommentsAsync();
             return Ok(comments);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Comment>> GetComment(Guid id)
         {
-            var comment = await _commentRepository.GetCommentAsync(id);
+            var comment = await _commentService.GetCommentAsync(id);
 
             if (comment == null)
             {
@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             comment.id = Guid.NewGuid();
-            await _commentRepository.CreateCommentAsync(comment);
+            await _commentService.CreateCommentAsync(comment);
             return CreatedAtAction(nameof(GetComment), new { id = comment.id }, comment);
         }
 
@@ -60,28 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingComment = await _commentRepository.GetCommentAsync(id);
+            var existingComment = await _commentService.GetCommentAsync(id);
 
             if (existingComment == null)
             {
                 return NotFound();
             }
 
-            await _commentRepository.UpdateCommentAsync(comment);
+            await _commentService.UpdateCommentAsync(comment);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteComment(Guid id)
         {
-            var existingComment = await _commentRepository.GetCommentAsync(id);
+            var existingComment = await _commentService.GetCommentAsync(id);
 
             if (existingComment == null)
             {
                 return NotFound();
             }
 
-            await _commentRepository.DeleteCommentAsync(id);
+            await _commentService.DeleteCommentAsync(id);
             return NoContent();
         }
     }

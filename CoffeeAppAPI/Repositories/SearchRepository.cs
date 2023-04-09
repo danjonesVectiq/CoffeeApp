@@ -1,64 +1,58 @@
+using Azure;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
-using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Azure.Core.Serialization;
 
 namespace CoffeeAppAPI.Repositories
 {
-    public interface ISearchRepository
+
+    public enum SearchIndexInstance
     {
-        Task<SearchResults<CoffeeSearchResult>> SearchCoffeesAsync(string query, int topResults = 10);
-        Task<SearchResults<CoffeeShopSearchResult>> SearchCoffeeShopsAsync(string query, int topResults = 10);
-        Task<SearchResults<RoasterSearchResult>> SearchRoastersAsync(string query, int topResults = 10);
-        Task<CombinedSearchResult> SearchAllAsync(string query, int topResults = 10);
-        Task<SearchResults<CoffeeShopSearchResult>> SearchCoffeeShopsNearbyAsync(double latitude, double longitude, double radius, int topResults = 10);
+        User,
+        Coffee,
+        Interaction
     }
 
-    public class SearchRepository : ISearchRepository
+    public class SearchRepository
     {
-        private readonly SearchService _searchService;
-        public SearchRepository(SearchService searchService)
-        {
-            _searchService = searchService;
-        }
-        public async Task<SearchResults<CoffeeShopSearchResult>> SearchCoffeeShopsNearbyAsync(double latitude, double longitude, double radius, int topResults)
-        {
-            var geoFilter = $"geo.distance(Location, geography'POINT({longitude} {latitude})') le {radius}";
-            var typeFilter = "Type eq 'CoffeeShop'";
+        private readonly Uri _serviceEndpoint;
+        private readonly AzureKeyCredential _adminCredentials;
 
-            return await _searchService.SearchAsync<CoffeeShopSearchResult>(SearchIndexInstance.Coffee, "*", topResults, $"{typeFilter} and {geoFilter}");
+        private static readonly IReadOnlyDictionary<SearchIndexInstance, string> IndexNames = new Dictionary<SearchIndexInstance, string>
+        {
+            { SearchIndexInstance.User, "user-index" },
+            { SearchIndexInstance.Coffee, "coffee-index" },
+            { SearchIndexInstance.Interaction, "interaction-index" },
+        };
+
+        public SearchRepository(IConfiguration configuration)
+        {
+            var azureConfig = configuration.GetSection("AzureCognitiveSearch");
+            _serviceEndpoint = new Uri($"https://{azureConfig["SearchRepositoryName"]}.search.windows.net");
+            _adminCredentials = new AzureKeyCredential(azureConfig["AdminApiKey"]);
         }
 
-        public async Task<SearchResults<CoffeeSearchResult>> SearchCoffeesAsync(string query, int topResults)
+        public async Task<SearchResults<T>> SearchAsync<T>(SearchIndexInstance indexInstance, string searchText, int topResults = 10, string typeFilter = null)
         {
-            return await _searchService.SearchAsync<CoffeeSearchResult>(SearchIndexInstance.Coffee, query, topResults, "Type eq 'Coffee'");
-        }
-        public async Task<SearchResults<CoffeeShopSearchResult>> SearchCoffeeShopsAsync(string query, int topResults)
-        {
-            return await _searchService.SearchAsync<CoffeeShopSearchResult>(SearchIndexInstance.Coffee, query, topResults, "Type eq 'CoffeeShop'");
-        }
-        public async Task<SearchResults<RoasterSearchResult>> SearchRoastersAsync(string query, int topResults)
-        {
-            return await _searchService.SearchAsync<RoasterSearchResult>(SearchIndexInstance.Coffee, query, topResults, "Type eq 'Roaster'");
-        }
-        public async Task<SearchResults<T>> SearchTypeAsync<T>(SearchIndexInstance index, string query, int topResults, string typeFilter = null)
-        {
-            return await _searchService.SearchAsync<T>(index, query, topResults, typeFilter);
-        }
-        public async Task<CombinedSearchResult> SearchAllAsync(string query, int topResults)
-        {
-            var coffees = await SearchCoffeesAsync(query, topResults);
-            var coffeeShops = await SearchCoffeeShopsAsync(query, topResults);
-            var roasters = await SearchRoastersAsync(query, topResults);
-            return new CombinedSearchResult
+            if (!IndexNames.TryGetValue(indexInstance, out string indexName))
             {
-                Coffees = coffees.GetResults().Select(r => r.Document),
-                CoffeeShops = coffeeShops.GetResults().Select(r => r.Document),
-                Roasters = roasters.GetResults().Select(r => r.Document)
+                throw new ArgumentException("Invalid index provided.");
+            }
+            var searchClient = new SearchClient(_serviceEndpoint, indexName, _adminCredentials);
+            var searchOptions = new SearchOptions
+            {
+                Size = topResults,
+                SearchMode = SearchMode.Any,
+                IncludeTotalCount = true,
+                Filter = typeFilter
             };
+            Response<SearchResults<T>> response = await searchClient.SearchAsync<T>(searchText, searchOptions);
+            return response.Value;
         }
     }
 }

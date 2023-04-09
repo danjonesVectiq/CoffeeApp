@@ -1,54 +1,54 @@
 /* using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace CoffeeAppAPI.Repositories
+namespace CoffeeAppAPI.Services
 {
-    public class UserFollowingRepository
+    public class UserFollowingService
     {
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly ICosmosDbRepository _cosmosDbRepository;
 
-        public UserFollowingRepository(ICosmosDbService cosmosDbService)
+        public UserFollowingService(ICosmosDbRepository cosmosDbRepository)
         {
-            _cosmosDbService = cosmosDbService;
+            _cosmosDbRepository = cosmosDbRepository;
         }
 
         public async Task<Container> GetUserFollowingsContainerAsync()
         {
-            return await _cosmosDbService.GetOrCreateContainerAsync("UserFollowings", "/id");
+            return await _cosmosDbRepository.GetOrCreateContainerAsync("UserFollowings", "/id");
         }
 
         public async Task<IEnumerable<UserFollowing>> GetAllUserFollowingsAsync()
         {
             var userFollowingsContainer = await GetUserFollowingsContainerAsync();
-            return await _cosmosDbService.GetAllItemsAsync<UserFollowing>(userFollowingsContainer);
+            return await _cosmosDbRepository.GetAllItemsAsync<UserFollowing>(userFollowingsContainer);
         }
 
         public async Task<UserFollowing> GetUserFollowingAsync(Guid id)
         {
             var userFollowingsContainer = await GetUserFollowingsContainerAsync();
-            return await _cosmosDbService.GetItemAsync<UserFollowing>(userFollowingsContainer, id.ToString());
+            return await _cosmosDbRepository.GetItemAsync<UserFollowing>(userFollowingsContainer, id.ToString());
         }
 
         public async Task CreateUserFollowingAsync(UserFollowing userFollowing)
         {
             var userFollowingsContainer = await GetUserFollowingsContainerAsync();
-            await _cosmosDbService.AddItemAsync(userFollowingsContainer, userFollowing);
+            await _cosmosDbRepository.AddItemAsync(userFollowingsContainer, userFollowing);
         }
 
         public async Task UpdateUserFollowingAsync(UserFollowing userFollowing)
         {
             var userFollowingsContainer = await GetUserFollowingsContainerAsync();
-            await _cosmosDbService.UpdateItemAsync(userFollowingsContainer, userFollowing.id.ToString(), userFollowing);
+            await _cosmosDbRepository.UpdateItemAsync(userFollowingsContainer, userFollowing.id.ToString(), userFollowing);
         }
 
         public async Task DeleteUserFollowingAsync(Guid id)
         {
             var userFollowingsContainer = await GetUserFollowingsContainerAsync();
-            await _cosmosDbService.DeleteItemAsync<UserFollowing>(userFollowingsContainer, id.ToString());
+            await _cosmosDbRepository.DeleteItemAsync<UserFollowing>(userFollowingsContainer, id.ToString());
         }
     }
 }

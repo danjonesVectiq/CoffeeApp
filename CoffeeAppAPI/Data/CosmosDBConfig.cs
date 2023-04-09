@@ -7,7 +7,7 @@ namespace CoffeeAppAPI.Configuration
     }
     public class AzureCognitiveSearchSettings
     {
-        public string SearchServiceName { get; set; }
+        public string SearchRepositoryName { get; set; }
         public string AdminApiKey { get; set; }
     }
 }

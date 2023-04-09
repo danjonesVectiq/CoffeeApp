@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Services;
 using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
@@ -12,24 +12,24 @@ namespace CoffeeAppAPI.Controllers
     [Route("api/[controller]")]
     public class UserFollowingsController : ControllerBase
     {
-        private readonly UserFollowingRepository _userFollowingRepository;
+        private readonly UserFollowingService _userFollowingService;
 
-        public UserFollowingsController(ICosmosDbService cosmosDbService)
+        public UserFollowingsController(ICosmosDbRepository cosmosDbRepository)
         {
-            _userFollowingRepository = new UserFollowingRepository(cosmosDbService);
+            _userFollowingService = new UserFollowingService(cosmosDbRepository);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserFollowing>>> GetAllUserFollowings()
         {
-            var userFollowings = await _userFollowingRepository.GetAllUserFollowingsAsync();
+            var userFollowings = await _userFollowingService.GetAllUserFollowingsAsync();
             return Ok(userFollowings);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserFollowing>> GetUserFollowing(Guid id)
         {
-            var userFollowing = await _userFollowingRepository.GetUserFollowingAsync(id);
+            var userFollowing = await _userFollowingService.GetUserFollowingAsync(id);
 
             if (userFollowing == null)
             {
@@ -48,7 +48,7 @@ namespace CoffeeAppAPI.Controllers
             }
 
             userFollowing.id = Guid.NewGuid();
-            await _userFollowingRepository.CreateUserFollowingAsync(userFollowing);
+            await _userFollowingService.CreateUserFollowingAsync(userFollowing);
             return CreatedAtAction(nameof(GetUserFollowing), new { id = userFollowing.id }, userFollowing);
         }
 
@@ -60,28 +60,28 @@ namespace CoffeeAppAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingUserFollowing = await _userFollowingRepository.GetUserFollowingAsync(id);
+            var existingUserFollowing = await _userFollowingService.GetUserFollowingAsync(id);
 
             if (existingUserFollowing == null)
             {
                 return NotFound();
             }
 
-            await _userFollowingRepository.UpdateUserFollowingAsync(userFollowing);
+            await _userFollowingService.UpdateUserFollowingAsync(userFollowing);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUserFollowing(Guid id)
         {
-            var existingUserFollowing = await _userFollowingRepository.GetUserFollowingAsync(id);
+            var existingUserFollowing = await _userFollowingService.GetUserFollowingAsync(id);
 
             if (existingUserFollowing == null)
             {
                 return NotFound();
             }
 
-            await _userFollowingRepository.DeleteUserFollowingAsync(id);
+            await _userFollowingService.DeleteUserFollowingAsync(id);
             return NoContent();
         }
     }

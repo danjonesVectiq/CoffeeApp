@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using CoffeeAppAPI.Services;
+using CoffeeAppAPI.Repositories;
 using Azure.Search.Documents.Indexes.Models;
 using Microsoft.Extensions.Configuration;
 
@@ -13,9 +13,9 @@ namespace CoffeeAppCLI
         {
             var host = CreateHostBuilder(args).Build();
 
-            // Retrieve the SearchService and IndexManagementService instances
-            var searchService = host.Services.GetRequiredService<CoffeeAppAPI.Services.SearchService>();
-            var indexManagementService = host.Services.GetRequiredService<CoffeeAppAPI.Services.IndexManagementService>();
+            // Retrieve the SearchRepository and IndexManagementRepository instances
+            var searchRepository = host.Repositories.GetRequiredRepository<CoffeeAppAPI.Repositories.SearchRepository>();
+            var indexManagementRepository = host.Repositories.GetRequiredRepository<CoffeeAppAPI.Repositories.IndexManagementRepository>();
 
             // Parse the command-line arguments
             if (args.Length > 0)
@@ -23,14 +23,14 @@ namespace CoffeeAppCLI
                 switch (args[0].ToLower())
                 {
                     case "initialize":
-                        indexManagementService.InitializeAsync().GetAwaiter().GetResult();
+                        indexManagementRepository.InitializeAsync().GetAwaiter().GetResult();
                         Console.WriteLine("Initialization completed.");
                         break;
                     case "status":
                         if (args.Length > 1)
                         {
                             string indexerName = args[1];
-                            var indexerStatus = indexManagementService.GetIndexerStatusAsync(indexerName).GetAwaiter().GetResult();
+                            var indexerStatus = indexManagementRepository.GetIndexerStatusAsync(indexerName).GetAwaiter().GetResult();
                             Console.WriteLine($"{indexerName} indexer status: {indexerStatus.Status}");
                         }
                         else
@@ -51,11 +51,11 @@ namespace CoffeeAppCLI
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
-        .ConfigureServices((hostContext, services) =>
+        .ConfigureRepositories((hostContext, services) =>
         {
             services.AddSingleton<IConfiguration>(hostContext.Configuration);
-            services.AddTransient<CoffeeAppAPI.Services.SearchService>();
-            services.AddTransient<CoffeeAppAPI.Services.IndexManagementService>();
+            services.AddTransient<CoffeeAppAPI.Repositories.SearchRepository>();
+            services.AddTransient<CoffeeAppAPI.Repositories.IndexManagementRepository>();
             // Register other services as needed
         });
 

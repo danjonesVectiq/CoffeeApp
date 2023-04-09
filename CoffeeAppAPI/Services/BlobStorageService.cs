@@ -1,50 +1,35 @@
-using System.Configuration;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
+using CoffeeAppAPI.Repositories;
+using CoffeeAppAPI.Helpers;
+
 
 namespace CoffeeAppAPI.Services
 {
     public interface IBlobStorageService
     {
         Task<string> UploadImageAsync(string blobName, string contentType, Stream imageStream);
-        Task DeleteImageAsync(string blobName);
+        Task DeleteImageAsync(Guid id, string ImageUrl);
     }
     public class BlobStorageService : IBlobStorageService
     {
-        private readonly BlobServiceClient _blobServiceClient;
-        private readonly IConfigurationSection _azureStorageConfig;
-
-        public BlobStorageService(IConfiguration configuration)
+        private readonly IBlobStorageRepository _blobStorageRepository;
+        public BlobStorageService(IBlobStorageRepository blobStorageRepository)
         {
-            _azureStorageConfig = configuration.GetSection("AzureStorage");
-            var connectionString = _azureStorageConfig["ConnectionString"];
-            _blobServiceClient = new BlobServiceClient(connectionString);
-
+            _blobStorageRepository = blobStorageRepository;
         }
+
         public async Task<string> UploadImageAsync(string blobName, string contentType, Stream imageStream)
         {
-            var containerClient = _blobServiceClient.GetBlobContainerClient(_azureStorageConfig["ContainerName"]);
-            var blobClient = containerClient.GetBlobClient(blobName);
-
-            await blobClient.UploadAsync(imageStream, new BlobUploadOptions
-            {
-                HttpHeaders = new BlobHttpHeaders
-                {
-                    ContentType = contentType
-                }
-            });
-
-            return blobClient.Uri.AbsoluteUri;
+            
+            return await _blobStorageRepository.UploadImageAsync(blobName, contentType, imageStream);
         }
-
-        public async Task DeleteImageAsync(string blobName)
+         public async Task DeleteImageAsync(Guid id, string ImageUrl)
         {
-            var containerClient = _blobServiceClient.GetBlobContainerClient(_azureStorageConfig["ContainerName"]);
-            var blobClient = containerClient.GetBlobClient(blobName);
-
-            await blobClient.DeleteAsync();
+            if (ImageUrl.StartsWith("https://coffeeappstorage.blob.core.windows.net/coffeeappcontainer/"))
+            {
+                await _blobStorageRepository.DeleteImageAsync(id.ToString());
+            }
         }
+
     }
-
-
 }
