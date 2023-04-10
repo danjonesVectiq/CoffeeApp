@@ -41,19 +41,6 @@ namespace CoffeeAppAPI.Controllers
 
             return Ok(new { ImageUrl = imageUrl });
         }
-
-        [HttpGet("{id}/preferences")]
-        public async Task<ActionResult<UserPreferences>> GetUserPreferences(Guid id)
-        {
-            var userPreferences = await _userService.LoadUserPreferences(id);
-
-            if (userPreferences == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(userPreferences);
-        }
         
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()

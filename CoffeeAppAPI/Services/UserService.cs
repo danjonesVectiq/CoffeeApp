@@ -8,7 +8,6 @@ namespace CoffeeAppAPI.Services
 {
     public interface IUserService : IService<User>
     {
-        Task<UserPreferences> LoadUserPreferences(Guid userId);
         Task DeleteAsync(User user);
         Task<string> UploadImageAsync(Guid coffeeShopId, string contentType, Stream imageStream);
 
@@ -21,23 +20,7 @@ namespace CoffeeAppAPI.Services
         {
             _blobStorageService = blobStorageService;
         }
-        public async Task<UserPreferences> LoadUserPreferences(Guid userId)
-        {
-            var user = await GetAsync(userId);
-            if (user != null)
-            {
-                var userPreferences = new UserPreferences
-                {
-                    CoffeeTypePreferences = user.CoffeeTypePreferences,
-                    RoastLevelPreferences = user.RoastLevelPreferences,
-                    FlavorNotePreferences = user.FlavorNotePreferences,
-                    OriginPreferences = user.OriginPreferences,
-                    BrewingMethodPreferences = user.BrewingMethodPreferences
-                };
-                return userPreferences;
-            }
-            return null;
-        }
+    
         public async Task DeleteAsync(User user)
         {
             if (user != null && !string.IsNullOrEmpty(user.ImageUrl))

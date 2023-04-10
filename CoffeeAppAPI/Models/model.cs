@@ -35,13 +35,15 @@ namespace CoffeeAppAPI.Models
         public int TotalUniqueCoffees { get; set; }
         public int TotalBadges { get; set; }
         public List<Guid>? FavoriteCoffeeShops { get; set; }
+        public List<Recommendation> Recommendations { get; set; }
+        public UserPreferences Preferences { get; set; }
         // public List<Guid>? Friends { get; set; }
-        public List<CoffeeTypePreference> CoffeeTypePreferences { get; set; }
+       /*  public List<CoffeeTypePreference> CoffeeTypePreferences { get; set; }
         public List<RoastLevelPreference> RoastLevelPreferences { get; set; }
         public List<FlavorNotePreference> FlavorNotePreferences { get; set; }
         public List<OriginPreference> OriginPreferences { get; set; }
         public List<BrewingMethodPreference> BrewingMethodPreferences { get; set; }
-        public List<Notification> Notifications { get; set; }
+        public List<Notification> Notifications { get; set; } */
         public List<Badge> Badges { get; set; }
     }
     public class Recipe : BaseModel
@@ -71,7 +73,7 @@ namespace CoffeeAppAPI.Models
         public string CoffeeType { get; set; }
         public string Origin { get; set; }
         public string RoastLevel { get; set; }
-        public string FlavorNotes { get; set; }
+        public List<string> FlavorNotes { get; set; }
         public double AverageRating { get; set; }
         public int TotalRatings { get; set; }
         public Roaster Roaster { get; set; }
@@ -168,7 +170,7 @@ namespace CoffeeAppAPI.Models
         public string CommentText { get; set; }
         public DateTime CommentDate { get; set; }
     }
-   
+
 
     public class Notification : BaseModel
     {
@@ -185,12 +187,24 @@ namespace CoffeeAppAPI.Models
         public override string Type { get; } = "Recommendation";
         public Guid UserId { get; set; }
         public Guid CoffeeId { get; set; }
-        public Guid RecommendedBy { get; set; }
-        public string RecommendationReason { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public double MatchScore { get; set; } // A value representing how well the coffee matches the user's preferences
+        public DateTime GeneratedOn { get; set; } // The date and time when the recommendation was generated
+    }
+    public class CoffeeSimilarity
+    {
+        public Guid CoffeeId1 { get; set; }
+        public Guid CoffeeId2 { get; set; }
+        public double SimilarityScore { get; set; }
     }
 
-     public class Photo
+    public class UserRecommendation
+    {
+        public Guid UserId { get; set; }
+        public Guid CoffeeId { get; set; }
+        public DateTime GeneratedOn { get; set; }
+    }
+
+    public class Photo
     {
         public Guid id { get; set; }
         public Guid UserId { get; set; }
@@ -209,15 +223,15 @@ namespace CoffeeAppAPI.Models
             public DateTime UploadDate { get; set; }
         }
 */
-   
-     /* 
-        public class UserFollowing
-        {
-            public Guid id { get; set; }
-            public Guid FollowerId { get; set; }
-            public Guid FolloweeId { get; set; }
-            public DateTime FollowDate { get; set; }
-        } */
+
+    /* 
+       public class UserFollowing
+       {
+           public Guid id { get; set; }
+           public Guid FollowerId { get; set; }
+           public Guid FolloweeId { get; set; }
+           public DateTime FollowDate { get; set; }
+       } */
     /*
             public class UserPhoto
             {

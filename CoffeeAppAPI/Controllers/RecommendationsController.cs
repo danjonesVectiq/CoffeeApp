@@ -3,85 +3,50 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CoffeeAppAPI.Models;
-using CoffeeAppAPI.Repositories;
 using CoffeeAppAPI.Services;
 
 namespace CoffeeAppAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/users/{userId}/[controller]")]
     public class RecommendationsController : ControllerBase
     {
-        private readonly RecommendationService _recommendationService;
+        private readonly IRecommendationService _recommendationService;
 
-        public RecommendationsController(ICosmosDbRepository cosmosDbRepository)
+        public RecommendationsController(IRecommendationService recommendationService)
         {
-            _recommendationService = new RecommendationService(cosmosDbRepository);
+            _recommendationService = recommendationService;
         }
 
+        // GET: api/users/{userId}/recommendations
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Recommendation>>> GetAllRecommendations()
+        public async Task<ActionResult<IEnumerable<Recommendation>>> GetRecommendationsForUser(Guid userId)
         {
-            var recommendations = await _recommendationService.GetAllAsync();
+            var recommendations = await _recommendationService.GetRecommendationsForUser(userId);
             return Ok(recommendations);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Recommendation>> GetRecommendation(Guid id)
+        // PUT: api/users/{userId}/recommendations
+        [HttpPut]
+        public async Task<ActionResult> UpdateRecommendationsForUser(Guid userId, [FromBody] List<Recommendation> recommendations)
         {
-            var recommendation = await _recommendationService.GetAsync(id);
-
-            if (recommendation == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(recommendation);
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Recommendation>> CreateRecommendation([FromBody] Recommendation recommendation)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            recommendation.id = Guid.NewGuid();
-            await _recommendationService.CreateAsync(recommendation);
-            return CreatedAtAction(nameof(GetRecommendation), new { id = recommendation.id }, recommendation);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateRecommendation(Guid id, [FromBody] Recommendation recommendation)
-        {
-            if (!ModelState.IsValid || id != recommendation.id)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var existingRecommendation = await _recommendationService.GetAsync(id);
-
-            if (existingRecommendation == null)
-            {
-                return NotFound();
-            }
-
-            await _recommendationService.UpdateAsync(recommendation);
+            await _recommendationService.SaveUserRecommendations(userId, recommendations);
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteRecommendation(Guid id)
+        // POST: api/users/{userId}/recommendations
+        [HttpPost]
+        public async Task<ActionResult> AddRecommendationToUser(Guid userId, [FromBody] Recommendation recommendation)
         {
-            var existingRecommendation = await _recommendationService.GetAsync(id);
+            await _recommendationService.AddRecommendationToUser(userId, recommendation);
+            return CreatedAtAction(nameof(GetRecommendationsForUser), new { userId = userId }, recommendation);
+        }
 
-            if (existingRecommendation == null)
-            {
-                return NotFound();
-            }
-
-            await _recommendationService.DeleteAsync(id);
+        // DELETE: api/users/{userId}/recommendations/{recommendationId}
+        [HttpDelete("{recommendationId}")]
+        public async Task<ActionResult> DeleteRecommendationFromUser(Guid userId, Guid recommendationId)
+        {
+            await _recommendationService.DeleteUserRecommendation(userId, recommendationId);
             return NoContent();
         }
     }
