@@ -8,7 +8,9 @@ namespace CoffeeAppAPI.Services
 {
     public interface ICoffeeService : IService<Coffee> 
     {
-        // Add any Coffee-specific methods here, if needed
+       // Task DeleteImageForCoffeeShopAsync(Guid id, string ImageUrl);
+        Task DeleteAsync(Coffee coffee);
+        Task<string> UploadImageAsync(Guid id, string contentType, Stream imageStream);
     }
 
     public class CoffeeService : CosmosDbService<Coffee>, ICoffeeService 

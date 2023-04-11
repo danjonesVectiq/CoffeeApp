@@ -23,7 +23,7 @@ namespace CoffeeAppAPI.Controllers
         }
 
         [HttpPost("{coffeeShopId}/upload-image")]
-       public async Task<IActionResult> UploadUserPicture(Guid coffeeShopId, [FromForm] IFormFile file)
+       public async Task<IActionResult> UploadCoffeeShopPicture(Guid coffeeShopId, [FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
             {

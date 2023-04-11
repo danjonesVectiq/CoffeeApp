@@ -17,6 +17,7 @@ namespace CoffeeAppAPI.Models
     {
         public Guid id { get; set; }
         public virtual string Type { get; } = "Base";
+        public DateTime Created { get; set; }
         public bool isDeleted { get; set; } = false;
     }
     public class User : BaseModel
@@ -38,12 +39,12 @@ namespace CoffeeAppAPI.Models
         public List<Recommendation> Recommendations { get; set; }
         public UserPreferences Preferences { get; set; }
         // public List<Guid>? Friends { get; set; }
-       /*  public List<CoffeeTypePreference> CoffeeTypePreferences { get; set; }
-        public List<RoastLevelPreference> RoastLevelPreferences { get; set; }
-        public List<FlavorNotePreference> FlavorNotePreferences { get; set; }
-        public List<OriginPreference> OriginPreferences { get; set; }
-        public List<BrewingMethodPreference> BrewingMethodPreferences { get; set; }
-        public List<Notification> Notifications { get; set; } */
+        /*  public List<CoffeeTypePreference> CoffeeTypePreferences { get; set; }
+         public List<RoastLevelPreference> RoastLevelPreferences { get; set; }
+         public List<FlavorNotePreference> FlavorNotePreferences { get; set; }
+         public List<OriginPreference> OriginPreferences { get; set; }
+         public List<BrewingMethodPreference> BrewingMethodPreferences { get; set; }
+         public List<Notification> Notifications { get; set; } */
         public List<Badge> Badges { get; set; }
     }
     public class Recipe : BaseModel
@@ -146,10 +147,7 @@ namespace CoffeeAppAPI.Models
         public Guid CoffeeId { get; set; }
         // This is nullable because a review can be for a coffee, or for a coffee at a coffee shop
         public Guid? CoffeeShopId { get; set; }
-        public int Rating { get; set; }
-        public double NormalizedRating { get; set; }
         public string ReviewText { get; set; }
-        public DateTime ReviewDate { get; set; }
         public List<ReviewLike> ReviewLikes { get; set; }
         public List<Comment> Comments { get; set; }
     }

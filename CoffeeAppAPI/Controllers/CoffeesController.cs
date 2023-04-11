@@ -23,6 +23,7 @@ namespace CoffeeAppAPI.Controllers
         }
 
         [HttpPost("{coffeeId}/upload-image")]
+
         public async Task<IActionResult> UploadCoffeePicture(Guid coffeeId, [FromForm] IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -36,14 +37,7 @@ namespace CoffeeAppAPI.Controllers
 
             string contentType = file.ContentType;
 
-        
-
-            // Create the blob name using coffeeId and a timestamp (or a GUID).
-            string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            string fileExtension = Helpers.BlobStorageHelpers.GetFileExtensionFromContentType(contentType);
-            string blobName = $"{coffeeId}/{timestamp}{fileExtension}";
-
-            var imageUrl = await _blobStorageService.UploadImageAsync(blobName, contentType, stream);
+            var imageUrl = await _coffeeService.UploadImageAsync(coffeeId, contentType, stream);
             Coffee coffee = _coffeeService.GetAsync(coffeeId).Result;
             coffee.ImageUrl = imageUrl;
             await _coffeeService.UpdateAsync(coffee);
