@@ -3,7 +3,7 @@ namespace CoffeeAppAPI.Models
     public class Rating :BaseModel
     {
         public int RatingValue { get; set; }
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
     }
     public class CoffeeRating : Rating
     {
