@@ -38,14 +38,9 @@ namespace CoffeeAppAPI.Models
         public List<Guid>? FavoriteCoffeeShops { get; set; }
         public List<Recommendation> Recommendations { get; set; }
         public UserPreferences Preferences { get; set; }
-        // public List<Guid>? Friends { get; set; }
-        /*  public List<CoffeeTypePreference> CoffeeTypePreferences { get; set; }
-         public List<RoastLevelPreference> RoastLevelPreferences { get; set; }
-         public List<FlavorNotePreference> FlavorNotePreferences { get; set; }
-         public List<OriginPreference> OriginPreferences { get; set; }
-         public List<BrewingMethodPreference> BrewingMethodPreferences { get; set; }
-         public List<Notification> Notifications { get; set; } */
         public List<Badge> Badges { get; set; }
+        public double AverageCoffeeRating { get; set; }
+        public double AverageCoffeeShopRating { get; set; }
     }
     public class Recipe : BaseModel
     {
@@ -101,7 +96,6 @@ namespace CoffeeAppAPI.Models
     {
         public override string Type { get; } = "CoffeeShop";
         public string ImageUrl { get; set; }
-
         public List<Photo> Photos { get; set; }
         public string CoffeeShopName { get; set; }
         public string Address { get; set; }
@@ -137,8 +131,6 @@ namespace CoffeeAppAPI.Models
         public string BadgeIconUrl { get; set; }
         public string BadgeCriteria { get; set; }
     }
-
-
 
     public class Review : BaseModel
     {

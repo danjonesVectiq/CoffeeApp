@@ -16,6 +16,19 @@ namespace CoffeeAppAPI.Services
             : base(cosmosDbRepository, "Interaction", "/id", entityType)
         {
         }
+
+        public static double CalculateAverageRating(User user, List<T> allRatings)
+        {
+            var userRatings = allRatings.Where(r => r.UserId == user.id).ToList();
+            if (userRatings.Count() == 0) return 0;
+
+            double sum = 0;
+            foreach (var rating in userRatings)
+            {
+                sum += rating.RatingValue;
+            }
+            return sum / userRatings.Count;
+        }
     }
 
     // CoffeeRatingService
@@ -27,7 +40,7 @@ namespace CoffeeAppAPI.Services
         }
     }
 
-     // CoffeeShopRatingService
+    // CoffeeShopRatingService
     public class CoffeeShopRatingService : RatingService<CoffeeShopRating>
     {
         public CoffeeShopRatingService(ICosmosDbRepository cosmosDbRepository)
@@ -36,7 +49,7 @@ namespace CoffeeAppAPI.Services
         }
     }
 
-     // RecipeRatingService
+    // RecipeRatingService
     public class RecipeRatingService : RatingService<RecipeRating>
     {
         public RecipeRatingService(ICosmosDbRepository cosmosDbRepository)
